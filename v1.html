@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hinove · Automação Fiscal</title>
+<style>
+/* ============================================================
+   HINOVE — Vitrine de Automação
+   Paleta derivada da marca:
+     azul-claro  #8FAFCB   navy #343F73   verde #2A9165
+   ============================================================ */
+
+:root{
+  --brand-blue:#8FAFCB;
+  --brand-navy:#343F73;
+  --brand-green:#2A9165;
+
+  --font-display:"Inter","Segoe UI Variable Display","Segoe UI",Helvetica,Arial,sans-serif;
+  --font-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --font-mono:ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,monospace;
+
+  --ease:cubic-bezier(.22,.8,.24,1);
+  --ease-travel:cubic-bezier(.65,.02,.15,1);
+}
+
+/* ---- tema escuro (padrão) ---- */
+html[data-theme="dark"]{
+  --bg:#080B14;
+  --bg-2:#0D1220;
+  --ink:#EEF2F8;
+  --ink-2:#A7B2C6;
+  --ink-3:#6B778F;
+  --line:rgba(143,175,203,.16);
+  --line-2:rgba(143,175,203,.30);
+  --card:rgba(143,175,203,.05);
+  --star:#C9D8EA;
+  --glow:.55;
+  --hero-wash:radial-gradient(120% 90% at 78% 8%, rgba(52,63,115,.55) 0%, rgba(8,11,20,0) 60%),
+              radial-gradient(90% 70% at 8% 92%, rgba(42,145,101,.20) 0%, rgba(8,11,20,0) 62%);
+}
+/* ---- tema claro ---- */
+html[data-theme="light"]{
+  --bg:#F4F6FA;
+  --bg-2:#FFFFFF;
+  --ink:#12182A;
+  --ink-2:#4A5568;
+  --ink-3:#8592A8;
+  --line:rgba(52,63,115,.14);
+  --line-2:rgba(52,63,115,.26);
+  --card:rgba(255,255,255,.72);
+  --star:#343F73;
+  --glow:.22;
+  --hero-wash:radial-gradient(120% 90% at 78% 6%, rgba(143,175,203,.42) 0%, rgba(244,246,250,0) 62%),
+              radial-gradient(90% 70% at 6% 94%, rgba(42,145,101,.16) 0%, rgba(244,246,250,0) 60%);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:var(--font-display);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  transition:background .5s var(--ease), color .5s var(--ease);
+}
+::selection{background:var(--brand-green);color:#fff}
+
+/* ---------------- layout base ---------------- */
+.wrap{width:min(1240px,92vw);margin-inline:auto}
+.eyebrow{
+  font-family:var(--font-mono);font-size:.68rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--ink-3);
+}
+.rule{height:1px;background:var(--line);border:0}
+
+/* ---------------- starfield ---------------- */
+#sky{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+.wash{position:fixed;inset:0;z-index:0;pointer-events:none;background:var(--hero-wash);transition:background .5s var(--ease)}
+main,header.nav{position:relative;z-index:2}
+
+/* ---------------- nav ---------------- */
+/* sem backdrop-filter: com o campo de estrelas animado atrás, o blur de fundo
+   força repintura de tela cheia a cada quadro */
+header.nav{
+  position:sticky;top:0;z-index:50;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 0}
+.logo{display:flex;align-items:center;gap:.7rem;text-decoration:none;color:inherit}
+.logo svg{display:block;height:34px;width:auto}
+.logo .wm{display:flex;flex-direction:column;line-height:1}
+.logo .wm b{font-size:1.18rem;font-weight:800;letter-spacing:-.02em;color:var(--brand-navy)}
+html[data-theme="dark"] .logo .wm b{color:#C7D3E6}
+.logo .wm span{font-size:.5rem;letter-spacing:.185em;color:var(--brand-green);font-weight:700;margin-top:.22rem}
+.nav-links{display:flex;align-items:center;gap:1.6rem}
+.nav-links a{
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-2);text-decoration:none;transition:color .25s
+}
+.nav-links a:hover{color:var(--ink)}
+.toggle{
+  width:52px;height:28px;border-radius:99px;border:1px solid var(--line-2);
+  background:var(--card);cursor:pointer;position:relative;transition:background .3s;flex:none
+}
+.toggle::after{
+  content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(150deg,var(--brand-blue),var(--brand-navy));
+  transition:transform .45s var(--ease),background .45s
+}
+html[data-theme="light"] .toggle::after{transform:translateX(24px);background:linear-gradient(150deg,#FFD9A0,var(--brand-green))}
+
+/* ---------------- hero ---------------- */
+.hero{padding:clamp(4rem,13vh,9rem) 0 clamp(3rem,8vh,6rem);position:relative}
+.hero-grid{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
+.hero h1{
+  font-size:clamp(3.1rem,11.5vw,10.5rem);
+  font-weight:800;letter-spacing:-.055em;line-height:.84;
+  text-transform:uppercase;
+}
+.hero h1 .lift{display:block}
+.hero h1 em{
+  font-family:var(--font-serif);font-style:italic;font-weight:400;
+  text-transform:none;letter-spacing:-.02em;
+  background:linear-gradient(96deg,var(--brand-blue),var(--brand-green) 55%,var(--brand-navy));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+html[data-theme="dark"] .hero h1 em{
+  background:linear-gradient(96deg,#B6CDE2,#3FBE85 52%,#7E8FD6);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero .sub{
+  max-width:46ch;margin-top:2rem;font-size:clamp(1rem,1.35vw,1.16rem);
+  line-height:1.65;color:var(--ink-2);
+}
+.hero .sub strong{color:var(--ink);font-weight:600}
+.hero-eyebrow{display:flex;align-items:center;gap:.8rem;margin-bottom:1.9rem}
+.hero-eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--brand-green);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand-green) 22%,transparent)}
+.scroll-cue{margin-top:3.2rem;display:inline-flex;align-items:center;gap:.6rem;color:var(--ink-3);
+  font-family:var(--font-mono);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;text-decoration:none}
+.scroll-cue .arrow{display:inline-block;animation:bob 2.4s var(--ease) infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+
+/* astronauta */
+.astro{width:clamp(180px,22vw,300px);animation:float 9s ease-in-out infinite;filter:drop-shadow(0 30px 60px rgba(0,0,0,.35))}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-22px) rotate(3deg)}}
+
+/* ---------------- métricas ---------------- */
+.metrics{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:2.6rem 0}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line)}
+.metric{background:var(--bg);padding:1.4rem 1.5rem;transition:background .5s var(--ease)}
+.metric .num{font-size:clamp(2rem,4.4vw,3.4rem);font-weight:800;letter-spacing:-.045em;line-height:1}
+.metric .num i{font-family:var(--font-serif);font-style:italic;font-weight:400;font-size:.5em;letter-spacing:0;margin-left:.12em;color:var(--ink-2)}
+.metric .lbl{margin-top:.6rem;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);line-height:1.6}
+
+/* ---------------- sistema / planetas ---------------- */
+.system{padding:clamp(4rem,9vh,7rem) 0 clamp(3rem,7vh,5rem)}
+.system-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:1.4rem}
+.system-head h2{font-size:clamp(1.7rem,3.6vw,2.8rem);font-weight:800;letter-spacing:-.04em;line-height:1.05;max-width:16ch}
+.system-head h2 em{font-family:var(--font-serif);font-style:italic;font-weight:400;letter-spacing:-.01em}
+.hint{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+
+.stage{
+  position:relative;height:clamp(480px,80vh,730px);margin-top:1rem;
+  border:1px solid var(--line);border-radius:26px;overflow:hidden;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--bg-2) 60%,transparent),transparent 70%);
+  transition:border-color .5s
+}
+.stage .orbits{position:absolute;inset:0;pointer-events:none;opacity:.75;transition:opacity .8s var(--ease)}
+.stage.travel .orbits{opacity:0}
+.orbit{
+  position:absolute;left:50%;top:50%;border:1px dashed var(--line);border-radius:50%;
+  transform:translate(-50%,-50%) rotate(-12deg)
+}
+
+/* planeta */
+.planet{
+  --s:.3; --x:0px; --y:0px; --px:0px; --py:0px;
+  position:absolute;left:50%;top:50%;width:400px;height:400px;margin:-200px 0 0 -200px;
+  transform:translate3d(calc(var(--x) + var(--px)),calc(var(--y) + var(--py)),0) scale(var(--s));
+  transition:transform 1.15s var(--ease-travel), opacity .6s var(--ease);
+  cursor:pointer;border:0;background:none;padding:0;color:inherit;
+  will-change:transform;
+}
+.planet:focus-visible{outline:none}
+.planet:focus-visible .ball{box-shadow:0 0 0 6px color-mix(in srgb,var(--c1) 45%,transparent)}
+.ball{
+  display:block;position:relative;width:100%;height:100%;border-radius:50%;
+  background:
+    radial-gradient(circle at 32% 28%, color-mix(in srgb,var(--c1) 92%, #fff 30%) 0%, var(--c1) 34%, var(--c2) 72%, var(--c3) 100%);
+  box-shadow:
+    inset -34px -30px 90px rgba(0,0,0,.55),
+    inset 18px 16px 60px color-mix(in srgb,var(--c1) 55%, transparent),
+    0 0 70px color-mix(in srgb, var(--c1) calc(var(--glow) * 55%), transparent);
+  overflow:hidden;
+  transition:box-shadow .6s var(--ease), transform .6s var(--ease);
+}
+/* superfície líquida — só transform é animado, para rodar no compositor */
+.ball .liquid{
+  display:block;position:absolute;inset:-18%;border-radius:50%;
+  background:
+    radial-gradient(45% 38% at 30% 34%, color-mix(in srgb,#fff 26%,transparent), transparent 70%),
+    radial-gradient(38% 30% at 72% 66%, color-mix(in srgb,var(--c3) 70%,transparent), transparent 72%),
+    radial-gradient(30% 26% at 58% 22%, color-mix(in srgb,var(--c2) 65%,transparent), transparent 70%);
+  filter:blur(7px);
+  will-change:transform;
+  animation:swirl 30s linear infinite;
+  opacity:.9;
+}
+.ball .liquid.b{animation:swirl 46s linear infinite reverse;opacity:.5;filter:blur(15px)}
+@keyframes swirl{
+  0%  {transform:rotate(0deg)   scale(1)}
+  50% {transform:rotate(180deg) scale(1.07)}
+  100%{transform:rotate(360deg) scale(1)}
+}
+/* pausa tudo quando o palco sai da tela */
+.stage.idle-offscreen .liquid{animation-play-state:paused}
+/* terminador / sombra do lado escuro */
+.ball .shade{position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 74% 78%, rgba(0,0,0,.62), rgba(0,0,0,0) 62%)}
+.ball .rim{position:absolute;inset:0;border-radius:50%;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,#fff 22%,transparent)}
+/* anel */
+.ring{
+  position:absolute;left:50%;top:50%;width:158%;height:158%;
+  transform:translate(-50%,-50%) rotate(-18deg) rotateX(76deg);
+  border:2px solid color-mix(in srgb,var(--c1) 45%,transparent);border-radius:50%;
+  opacity:.0;transition:opacity .6s var(--ease)
+}
+.planet.has-ring .ring{opacity:.65}
+
+/* rótulo do planeta */
+.tag{
+  position:absolute;left:50%;bottom:-14%;transform-origin:top center;
+  transform:translateX(-50%) scale(var(--inv,1));
+  display:flex;flex-direction:column;align-items:center;gap:.3rem;white-space:nowrap;
+  transition:opacity .45s var(--ease)
+}
+.tag .nm{font-size:1.4rem;font-weight:700;letter-spacing:-.03em}
+.tag .st{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.planet.active .tag .nm{font-size:1.9rem}
+
+.planet:hover .ball,.planet:focus-visible .ball{transform:scale(1.05)}
+.planet:hover .liquid{animation-duration:12s}
+.planet:hover .liquid.b{animation-duration:18s}
+
+/* estados de viagem */
+.stage.travel .planet.active .tag{opacity:0}
+.stage.travel .planet:not(.active) .tag .st{opacity:0}
+.stage.travel .planet:not(.active) .tag{bottom:-24%}
+.stage.travel .planet:not(.active) .tag .nm{font-size:.78rem;font-weight:600;letter-spacing:.01em;color:var(--ink-2)}
+.stage.travel .planet:not(.active) .ball{box-shadow:inset -20px -18px 50px rgba(0,0,0,.55), 0 0 24px color-mix(in srgb,var(--c1) 30%,transparent)}
+
+/* painel de detalhe */
+.panel{
+  position:absolute;right:0;top:0;height:100%;width:min(52%,560px);z-index:4;
+  padding:clamp(7.5rem,20vh,10rem) clamp(1.6rem,3vw,2.8rem) clamp(1.4rem,3vw,2.4rem);
+  display:flex;flex-direction:column;justify-content:center;gap:.95rem;
+  scrollbar-width:none;
+  background:linear-gradient(270deg, color-mix(in srgb,var(--bg) 96%,transparent) 0%, color-mix(in srgb,var(--bg) 88%,transparent) 58%, transparent 100%);
+  opacity:0;pointer-events:none;transform:translateX(26px);
+  transition:opacity .6s var(--ease) .15s, transform .8s var(--ease) .15s;
+  overflow:auto;
+}
+.panel.on{opacity:1;pointer-events:auto;transform:none}
+.panel .pill{
+  align-self:flex-start;display:inline-flex;align-items:center;gap:.5rem;
+  font-family:var(--font-mono);font-size:.63rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:.4rem .7rem;border:1px solid var(--line-2);border-radius:99px;color:var(--ink-2)
+}
+.panel .pill .bt{width:6px;height:6px;border-radius:50%;background:var(--brand-green)}
+.panel .pill.wip .bt{background:#E0A73C;animation:pulse 1.8s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.28}}
+.panel h3{font-size:clamp(1.9rem,3.4vw,2.9rem);font-weight:800;letter-spacing:-.045em;line-height:1}
+.panel .kick{font-family:var(--font-serif);font-style:italic;font-size:clamp(1rem,1.5vw,1.22rem);color:var(--ink-2)}
+.panel p.desc{font-size:.95rem;line-height:1.65;color:var(--ink-2);max-width:42ch}
+.panel::-webkit-scrollbar{width:0;height:0}
+.panel .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-block:1px solid var(--line)}
+.panel .kpi{background:var(--bg);padding:.9rem .8rem}
+.panel .kpi b{display:block;font-size:1.5rem;font-weight:800;letter-spacing:-.04em}
+.panel .kpi span{display:block;margin-top:.3rem;font-family:var(--font-mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);line-height:1.5}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem}
+.chips span{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.08em;padding:.32rem .6rem;border:1px solid var(--line);border-radius:6px;color:var(--ink-3)}
+.back{
+  align-self:flex-start;margin-top:.4rem;background:none;border:0;cursor:pointer;color:var(--ink-2);
+  font-family:var(--font-mono);font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;
+  display:inline-flex;align-items:center;gap:.55rem;padding:.5rem 0;transition:color .25s
+}
+.back:hover{color:var(--ink)}
+
+/* ---------------- rodapé ---------------- */
+.closing{padding:clamp(4rem,9vh,7rem) 0}
+.closing-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:clamp(2rem,5vw,5rem);align-items:start}
+.closing h2{font-size:clamp(1.8rem,4.2vw,3.2rem);font-weight:800;letter-spacing:-.045em;line-height:1.03}
+.closing h2 em{font-family:var(--font-serif);font-style:italic;font-weight:400}
+.closing p{color:var(--ink-2);line-height:1.75;font-size:1rem;max-width:48ch}
+.roadmap{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.rm{display:grid;grid-template-columns:auto 1fr auto;gap:1rem;align-items:baseline;padding:1rem 0;border-bottom:1px solid var(--line)}
+.rm .q{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.14em;color:var(--ink-3)}
+.rm .t{font-weight:600;letter-spacing:-.01em}
+.rm .s{font-family:var(--font-mono);font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3)}
+.rm .s.ok{color:var(--brand-green)}
+footer{border-top:1px solid var(--line);padding:2rem 0 3rem}
+.foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;
+  font-family:var(--font-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+
+/* ---------------- responsivo ---------------- */
+@media (max-width:900px){
+  .hero-grid{grid-template-columns:1fr}
+  .astro{display:none}
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .closing-grid{grid-template-columns:1fr}
+  .system-head{flex-direction:column;align-items:flex-start;gap:.6rem}
+  .stage{height:min(90vh,780px)}
+  .panel{width:100%;height:66%;top:auto;bottom:0;
+    background:linear-gradient(0deg, color-mix(in srgb,var(--bg) 97%,transparent) 72%, transparent);
+    justify-content:flex-start;gap:.7rem;
+    padding:1.2rem clamp(1.1rem,4vw,1.8rem) 1.4rem;transform:translateY(24px)}
+  .panel.on{transform:none}
+  .panel h3{font-size:1.75rem}
+  .panel p.desc{font-size:.9rem;line-height:1.6}
+  .stage.travel .planet:not(.active) .tag .nm{font-size:.68rem}
+  .panel .kpis{grid-template-columns:repeat(3,1fr)}
+  .nav-links a{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;transition-duration:.12s !important}
+}
+</style>
+</head>
+<body>
+
+<canvas id="sky"></canvas>
+<div class="wash"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top" aria-label="Hinove Fertilizantes Especiais">
+      <svg viewBox="0 0 120 100" aria-hidden="true">
+        <g>
+          <circle cx="40" cy="38" r="38" fill="#8FAFCB"/>
+          <circle cx="74" cy="52" r="34" fill="#343F73" opacity=".88"/>
+          <circle cx="45" cy="72" r="26" fill="#2A9165" opacity=".88"/>
+        </g>
+      </svg>
+      <span class="wm"><b>HINOVE</b><span>FERTILIZANTES ESPECIAIS</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#numeros">Números</a>
+      <a href="#sistema">Projetos</a>
+      <a href="#horizonte">Horizonte</a>
+    </nav>
+    <button class="toggle" id="themeBtn" aria-label="Alternar tema claro/escuro"></button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ============ HERO ============ -->
+<section class="hero wrap">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow"><span class="dot"></span><span class="eyebrow">Núcleo Fiscal · Automação Interna</span></div>
+      <h1>
+        <span class="lift">Trabalho</span>
+        <span class="lift">que roda</span>
+        <span class="lift"><em>sozinho.</em></span>
+      </h1>
+      <p class="sub">
+        Três sistemas que assumiram a parte repetitiva da rotina fiscal da Hinove —
+        conferência, envio e classificação. O analista deixou de <strong>procurar erro</strong>
+        para voltar a <strong>analisar número</strong>.
+      </p>
+      <a class="scroll-cue" href="#sistema"><span class="arrow">↓</span> Explorar o sistema</a>
+    </div>
+
+    <!-- mascote -->
+    <svg class="astro" viewBox="0 0 240 260" aria-hidden="true">
+      <defs>
+        <linearGradient id="suit" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D6DEEA"/>
+        </linearGradient>
+        <linearGradient id="visor" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#2B3050"/><stop offset="1" stop-color="#14172B"/>
+        </linearGradient>
+        <linearGradient id="flame" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#F5B841"/><stop offset="1" stop-color="#E2542F"/>
+        </linearGradient>
+      </defs>
+      <!-- chama -->
+      <path d="M64 196c-22 6-38 22-44 42 22-4 40-14 52-28z" fill="url(#flame)" opacity=".95"/>
+      <!-- foguete -->
+      <g transform="rotate(-32 130 180)">
+        <path d="M92 168h84c22 0 40 10 48 22-8 12-26 22-48 22H92c-14 0-24-10-24-22s10-22 24-22z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M176 168c22 0 40 10 48 22-8 12-26 22-48 22z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <circle cx="128" cy="190" r="16" fill="#5EC8DE" stroke="#2B3050" stroke-width="5"/>
+        <path d="M96 168c-6-14-4-24 2-30 8 6 12 16 12 30z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M96 212c-6 14-4 24 2 30 8-6 12-16 12-30z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      </g>
+      <!-- corpo -->
+      <path d="M96 128c-14 6-22 20-20 36 2 14 14 24 30 24h30c16 0 26-12 26-26 0-18-12-32-30-36z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <!-- braço aceno -->
+      <path d="M150 126c10-16 26-22 38-16 10 5 12 18 4 26-8 8-22 8-30 0z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <!-- braço apoiado -->
+      <path d="M92 150c-12 4-18 16-14 26 4 9 16 12 24 6" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <!-- capacete -->
+      <circle cx="128" cy="76" r="52" fill="url(#suit)" stroke="#2B3050" stroke-width="5"/>
+      <circle cx="128" cy="76" r="40" fill="url(#visor)" stroke="#2B3050" stroke-width="4"/>
+      <ellipse cx="112" cy="60" rx="15" ry="9" fill="#fff" opacity=".85" transform="rotate(-32 112 60)"/>
+      <circle cx="150" cy="86" r="6" fill="#fff" opacity=".7"/>
+      <circle cx="158" cy="66" r="3.4" fill="#fff" opacity=".5"/>
+      <!-- detalhe peito -->
+      <rect x="112" y="150" width="34" height="22" rx="7" fill="#8FAFCB" stroke="#2B3050" stroke-width="4"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ MÉTRICAS ============ -->
+<section class="metrics" id="numeros">
+  <div class="wrap">
+    <div class="metrics-grid">
+      <div class="metric"><div class="num" data-count="480">0</div><div class="lbl">Horas devolvidas<br>ao time / mês</div></div>
+      <div class="metric"><div class="num" data-count="164" data-suffix="k">0</div><div class="lbl">Documentos fiscais<br>processados / ano</div></div>
+      <div class="metric"><div class="num" data-count="99" data-suffix="%">0</div><div class="lbl">Das validações gerais<br>sem toque humano</div></div>
+      <div class="metric"><div class="num" data-count="3">0</div><div class="lbl">Rotinas críticas<br>em órbita</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SISTEMA ============ -->
+<section class="system wrap" id="sistema">
+  <div class="system-head">
+    <h2>Três corpos em <em>órbita</em> na rotina fiscal.</h2>
+    <span class="hint">Clique em um planeta para viajar até ele</span>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="orbits" aria-hidden="true">
+      <div class="orbit" style="width:46%;height:46%"></div>
+      <div class="orbit" style="width:74%;height:74%"></div>
+      <div class="orbit" style="width:104%;height:104%"></div>
+    </div>
+
+    <!-- FISCALBOT -->
+    <button class="planet" id="p-fiscalbot" data-fx="-.30" data-fy="-.06" data-fs=".34" data-depth="1.4"
+            style="--c1:#A9C6DE;--c2:#5E86AC;--c3:#22345A" aria-label="FiscalBot">
+      <span class="ring"></span>
+      <span class="ball"><span class="liquid"></span><span class="liquid b"></span><span class="shade"></span><span class="rim"></span></span>
+      <span class="tag"><span class="nm">FiscalBot</span><span class="st">Em produção</span></span>
+    </button>
+
+    <!-- AUTOREINF -->
+    <button class="planet" id="p-autoreinf" data-fx=".05" data-fy=".17" data-fs=".26" data-depth="2.2"
+            style="--c1:#6E7CC4;--c2:#343F73;--c3:#161C3A" aria-label="AutoReinf">
+      <span class="ball"><span class="liquid"></span><span class="liquid b"></span><span class="shade"></span><span class="rim"></span></span>
+      <span class="tag"><span class="nm">AutoReinf</span><span class="st">Em produção</span></span>
+    </button>
+
+    <!-- CTE AUTO V2 -->
+    <button class="planet" id="p-cteauto" data-fx=".33" data-fy="-.20" data-fs=".19" data-depth="3.1"
+            style="--c1:#4FC38C;--c2:#2A9165;--c3:#0E4B31" aria-label="CT-e Auto v2">
+      <span class="ball"><span class="liquid"></span><span class="liquid b"></span><span class="shade"></span><span class="rim"></span></span>
+      <span class="tag"><span class="nm">CT-e Auto v2</span><span class="st">Em construção</span></span>
+    </button>
+
+    <!-- PAINÉIS -->
+    <div class="panel" data-for="fiscalbot">
+      <span class="pill"><span class="bt"></span> Em produção · auditoria</span>
+      <h3>FiscalBot</h3>
+      <p class="kick">O revisor que nunca pisca.</p>
+      <p class="desc">Varre a base de notas em busca de inconsistências e desvios de conformidade tributária.
+        Elimina <strong>99% das validações gerais</strong> — cruzamento de CFOP, CST, alíquota, base e cadastro —
+        e entrega ao analista apenas o que exige julgamento.</p>
+      <div class="kpis">
+        <div class="kpi"><b>99%</b><span>validações automatizadas</span></div>
+        <div class="kpi"><b>320h</b><span>liberadas / mês</span></div>
+        <div class="kpi"><b>1.140</b><span>inconsistências capturadas / ano</span></div>
+      </div>
+      <div class="chips"><span>Python</span><span>XML NF-e</span><span>Regras SPED</span><span>Relatórios</span></div>
+      <button class="back" type="button">← Voltar ao sistema</button>
+    </div>
+
+    <div class="panel" data-for="autoreinf">
+      <span class="pill"><span class="bt"></span> Em produção · obrigação acessória</span>
+      <h3>AutoReinf</h3>
+      <p class="kick">Do arquivo ao recibo, sem digitação.</p>
+      <p class="desc">Monta e transmite automaticamente os eventos de serviços tomados à Receita Federal.
+        Uma rotina que era 100% manual — e por isso 100% exposta a erro de digitação — passou a rodar
+        em lote, com trilha de retorno e reprocessamento.</p>
+      <div class="kpis">
+        <div class="kpi"><b>2.800</b><span>eventos enviados / mês</span></div>
+        <div class="kpi"><b>96h</b><span>liberadas / mês</span></div>
+        <div class="kpi"><b>0</b><span>erros de digitação</span></div>
+      </div>
+      <div class="chips"><span>Python</span><span>EFD-Reinf</span><span>Certificado A1</span><span>Fila de retorno</span></div>
+      <button class="back" type="button">← Voltar ao sistema</button>
+    </div>
+
+    <div class="panel" data-for="cteauto">
+      <span class="pill wip"><span class="bt"></span> Em construção · piloto</span>
+      <h3>CT-e Auto v2</h3>
+      <p class="kick">A próxima órbita.</p>
+      <p class="desc">Identifica os conhecimentos de transporte de fretes tomados e faz a classificação
+        tributária de ponta a ponta — sem planilha intermediária. Hoje em piloto controlado,
+        com meta de <strong>90% de classificação sem intervenção</strong>.</p>
+      <div class="kpis">
+        <div class="kpi"><b>68%</b><span>do escopo concluído</span></div>
+        <div class="kpi"><b>4.500</b><span>CT-e / mês no alvo</span></div>
+        <div class="kpi"><b>64h</b><span>projetadas / mês</span></div>
+      </div>
+      <div class="chips"><span>Python</span><span>CT-e 4.0</span><span>Motor de regras</span><span>Piloto Q3</span></div>
+      <button class="back" type="button">← Voltar ao sistema</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HORIZONTE ============ -->
+<section class="closing wrap" id="horizonte">
+  <div class="closing-grid">
+    <div>
+      <h2>Automatizar não é cortar gente.<br><em>É devolver o tempo</em> para pensar.</h2>
+      <p style="margin-top:1.4rem">
+        Cada rotina que entra em órbita libera horas que voltam para conferência analítica,
+        planejamento tributário e recuperação de crédito — o trabalho que só uma pessoa faz bem.
+        As próximas missões seguem a mesma regra: primeiro o que é repetitivo, previsível e auditável.
+      </p>
+    </div>
+    <div class="roadmap">
+      <div class="rm"><span class="q">2024</span><span class="t">FiscalBot em produção</span><span class="s ok">Concluído</span></div>
+      <div class="rm"><span class="q">2025</span><span class="t">AutoReinf em produção</span><span class="s ok">Concluído</span></div>
+      <div class="rm"><span class="q">2026 · Q3</span><span class="t">CT-e Auto v2 — piloto</span><span class="s">Em curso</span></div>
+      <div class="rm"><span class="q">2026 · Q4</span><span class="t">Painel único de exceções</span><span class="s">Previsto</span></div>
+      <div class="rm"><span class="q">2027</span><span class="t">Conciliação automática de crédito</span><span class="s">Estudo</span></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span>Hinove Fertilizantes Especiais · Núcleo Fiscal</span>
+    <span>Números ilustrativos · vitrine interna</span>
+  </div>
+</footer>
+</main>
+
+<script>
+/* ---------------- tema ---------------- */
+(function(){
+  const root=document.documentElement, btn=document.getElementById('themeBtn');
+  const saved=localStorage.getItem('hinove-theme');
+  root.dataset.theme = saved || 'dark';   /* o escuro é o padrão: é o espaço */
+  btn.addEventListener('click',()=>{
+    root.dataset.theme = root.dataset.theme==='dark'?'light':'dark';
+    localStorage.setItem('hinove-theme',root.dataset.theme);
+  });
+})();
+
+/* ---------------- starfield ---------------- */
+(function(){
+  const cv=document.getElementById('sky'), ctx=cv.getContext('2d');
+  let stars=[], w=0, h=0, dpr=Math.min(devicePixelRatio||1,1.5), t=0;
+  function build(){
+    w=cv.width=innerWidth*dpr; h=cv.height=innerHeight*dpr;
+    cv.style.width=innerWidth+'px'; cv.style.height=innerHeight+'px';
+    const n=Math.round((innerWidth*innerHeight)/14000);
+    stars=Array.from({length:n},()=>({
+      x:Math.random()*w, y:Math.random()*h,
+      r:(Math.random()*1.5+.3)*dpr,
+      a:Math.random()*.7+.15,
+      sp:Math.random()*.12+.02,
+      ph:Math.random()*Math.PI*2
+    }));
+  }
+  let last=0;
+  function draw(now){
+    requestAnimationFrame(draw);
+    if(document.hidden) return;
+    if(now-last<33) return;           /* ~30fps basta para estrelas */
+    last=now;
+    const light=document.documentElement.dataset.theme==='light';
+    const col=light?'52,63,115':'201,216,234';
+    ctx.clearRect(0,0,w,h); t+=.033;
+    for(const s of stars){
+      s.y-=s.sp*dpr*2; if(s.y<-4) {s.y=h+4; s.x=Math.random()*w;}
+      const tw=.55+.45*Math.sin(t*1.4+s.ph);
+      ctx.beginPath();
+      ctx.fillStyle='rgba('+col+','+(s.a*tw*(light?.42:1)).toFixed(3)+')';
+      ctx.arc(s.x,s.y,s.r,0,6.2832); ctx.fill();
+    }
+  }
+  build(); requestAnimationFrame(draw);
+  addEventListener('resize',build,{passive:true});
+})();
+
+/* ---------------- contadores ---------------- */
+(function(){
+  const els=[...document.querySelectorAll('[data-count]')];
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return; io.unobserve(e.target);
+    const el=e.target, end=+el.dataset.count, sfx=el.dataset.suffix||'', dur=1400, t0=performance.now();
+    (function step(now){
+      const k=Math.min((now-t0)/dur,1), v=Math.round(end*(1-Math.pow(1-k,3)));
+      el.innerHTML=v.toLocaleString('pt-BR')+(sfx?'<i>'+sfx+'</i>':'');
+      if(k<1) requestAnimationFrame(step);
+    })(t0);
+  }),{threshold:.4});
+  els.forEach(el=>io.observe(el));
+})();
+
+/* ---------------- sistema planetário ---------------- */
+(function(){
+  const stage=document.getElementById('stage');
+  const planets=[...stage.querySelectorAll('.planet')];
+  const panels=[...stage.querySelectorAll('.panel')];
+  let active=null, mx=0, my=0;
+
+  const isNarrow=()=>innerWidth<900;
+
+  function layout(){
+    const W=stage.clientWidth, H=stage.clientHeight;
+    const narrow=isNarrow();
+    const base=400; // diâmetro base do .planet
+    planets.forEach((p,i)=>{
+      let x,y,s;
+      if(!active){
+        x=+p.dataset.fx*W; y=+p.dataset.fy*H; s=+p.dataset.fs*(narrow?.8:1);
+        if(narrow){ x*=.76; y*=.95; }   /* mantém rótulos dentro do palco */
+      }else if(p===active){
+        const r=narrow? Math.min(W*.30,H*.155) : Math.min(W*.26,H*.44);
+        s=(r*2)/base;
+        x=narrow? -W*.20 : -W*.30;
+        y=narrow? -H*.34 : 0;
+      }else{
+        const others=planets.filter(q=>q!==active);
+        const k=others.indexOf(p);
+        s=narrow?.07:.095;
+        x=narrow? (W*.16 + k*W*.24) : (W*.14 + k*W*.20);
+        y=narrow? (-H*.42)          : (-H*.36);
+      }
+      p.style.setProperty('--x',x.toFixed(1)+'px');
+      p.style.setProperty('--y',y.toFixed(1)+'px');
+      p.style.setProperty('--s',s.toFixed(3));
+      p.style.setProperty('--inv',(1/s).toFixed(3));
+      /* em viagem, os planetas distantes ficam acima do painel para continuarem clicáveis */
+      p.style.zIndex = active ? (p===active?3:6) : (3-i);
+    });
+  }
+
+  function travel(p){
+    active=p;
+    stage.classList.add('travel');
+    planets.forEach(q=>q.classList.toggle('active',q===p));
+    const id=p.id.replace('p-','');
+    panels.forEach(pn=>pn.classList.toggle('on',pn.dataset.for===id));
+    layout();
+  }
+  function home(){
+    active=null;
+    stage.classList.remove('travel');
+    planets.forEach(q=>q.classList.remove('active'));
+    panels.forEach(pn=>pn.classList.remove('on'));
+    layout();
+  }
+
+  planets.forEach(p=>p.addEventListener('click',()=>{ p===active?home():travel(p); }));
+  stage.querySelectorAll('.back').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();home();}));
+  stage.addEventListener('click',e=>{ if(e.target===stage && active) home(); });
+  addEventListener('keydown',e=>{ if(e.key==='Escape'&&active) home(); });
+
+  /* parallax "água/espaço" */
+  stage.addEventListener('pointermove',e=>{
+    const r=stage.getBoundingClientRect();
+    mx=(e.clientX-r.left)/r.width-.5;
+    my=(e.clientY-r.top)/r.height-.5;
+    kick();
+  },{passive:true});
+  stage.addEventListener('pointerleave',()=>{mx=0;my=0;kick();});
+
+  let cx=0,cy=0,running=false;
+  function drift(){
+    cx+=(mx-cx)*.07; cy+=(my-cy)*.07;
+    planets.forEach(p=>{
+      const d=+p.dataset.depth;
+      p.style.setProperty('--px',(cx*22*d).toFixed(2)+'px');
+      p.style.setProperty('--py',(cy*16*d).toFixed(2)+'px');
+    });
+    /* só continua enquanto ainda houver movimento a acomodar */
+    if(Math.abs(mx-cx)>.001||Math.abs(my-cy)>.001){requestAnimationFrame(drift);}
+    else running=false;
+  }
+  function kick(){ if(!running){running=true;requestAnimationFrame(drift);} }
+
+  /* pausa a superfície dos planetas quando o palco não está visível */
+  new IntersectionObserver(es=>{
+    stage.classList.toggle('idle-offscreen',!es[0].isIntersecting);
+  },{threshold:0}).observe(stage);
+
+  layout();
+  addEventListener('resize',layout,{passive:true});
+})();
+</script>
+</body>
+</html>

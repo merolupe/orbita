@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hinove · Automação Fiscal</title>
+<style>
+/* ==========================================================================
+   HINOVE — Vitrine de Automação · v3
+   Paleta: azul #8FAFCB · navy #343F73 · verde #2A9165
+   Só o painel do sistema solar é sempre escuro. O resto segue o tema.
+   ========================================================================== */
+:root{
+  --blue:#8FAFCB;
+  --blue-d:#5E86AC;
+  --navy:#343F73;
+  --green:#2A9165;
+  --green-l:#3FBE85;
+
+  /* painel espacial — constante nos dois temas */
+  --space:#080C17;
+  --space-2:#0D1424;
+  --sink:#EDF2F9;
+  --sink-2:#A6B3C9;
+  --sink-3:#71809B;
+  --sline:rgba(143,175,203,.20);
+  --sline-2:rgba(143,175,203,.38);
+
+  --f-display:"Inter","Segoe UI Variable Display","Segoe UI",Helvetica,Arial,sans-serif;
+  --f-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --f-mono:ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,monospace;
+
+  --ease:cubic-bezier(.22,.8,.24,1);
+  --ease-io:cubic-bezier(.62,.03,.2,1);
+  --r-lg:26px;
+}
+html[data-theme="dark"]{
+  --bg:#0A0E1A; --bg-2:#101827; --panel:rgba(143,175,203,.055);
+  --ink:#EEF2F8; --ink-2:#AAB6CA; --ink-3:#7B889F;
+  --line:rgba(143,175,203,.17); --line-2:rgba(143,175,203,.32);
+  --accent-ink:#8FAFCB;
+}
+/* claro: nada de preto — o texto é o azul-escuro da marca */
+html[data-theme="light"]{
+  --bg:#F4F6FA; --bg-2:#FFFFFF; --panel:#FFFFFF;
+  --ink:#2B3563; --ink-2:#5A6690; --ink-3:#8B96B4;
+  --line:rgba(52,63,115,.16); --line-2:rgba(52,63,115,.3);
+  --accent-ink:#343F73;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--f-display);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  transition:background .5s var(--ease),color .5s var(--ease);
+}
+body.locked{overflow:hidden}
+::selection{background:var(--green);color:#fff}
+.wrap{width:min(1240px,92vw);margin-inline:auto}
+h1,h2,h3{letter-spacing:-.045em;line-height:1.02;font-weight:800}
+.serif{font-family:var(--f-serif);font-style:italic;font-weight:400;letter-spacing:-.02em}
+
+/* rótulos mono — legíveis, nunca abaixo de ~11px */
+.lab{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;line-height:1.6}
+.lab-s{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;line-height:1.6}
+
+/* ---- motion: elementos populando a tela ---- */
+[data-r]{opacity:0;transform:translateY(18px);
+  transition:opacity .85s var(--ease),transform .95s var(--ease)}
+[data-r].in{opacity:1;transform:none}
+
+/* ==========================================================================
+   LANÇAMENTO
+   ========================================================================== */
+#launch{
+  position:fixed;inset:0;z-index:200;background:var(--space);
+  display:grid;place-items:center;overflow:hidden;
+  transition:opacity .85s var(--ease),visibility .85s;
+}
+#launch.gone{opacity:0;visibility:hidden}
+#launch canvas{position:absolute;inset:0;width:100%;height:100%}
+.launch-in{position:relative;z-index:2;text-align:center;display:grid;justify-items:center;gap:1.4rem;padding:2rem}
+.launch-in .brandline{color:var(--sink-3)}
+.ship-hold{position:relative;transition:transform 1.6s var(--ease-io)}
+#launch.go .ship-hold{transform:translateY(-125vh) scale(.66)}
+.ship{width:clamp(148px,19vw,196px);display:block;animation:hover-idle 4.2s ease-in-out infinite}
+#launch.go .ship{animation:shake .2s linear infinite}
+@keyframes hover-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
+@keyframes shake{0%,100%{transform:translateX(-1.6px)}50%{transform:translateX(1.6px)}}
+.flame{transform-origin:110px 250px;opacity:0;transition:opacity .28s}
+#launch.go .flame{opacity:1;animation:burn .15s linear infinite}
+@keyframes burn{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.55) scaleX(.85)}}
+.trail{position:absolute;left:50%;top:60%;width:3px;height:0;transform:translateX(-50%);
+  background:linear-gradient(180deg,rgba(255,245,220,.9),rgba(246,197,106,0));
+  border-radius:99px;transition:height 1.6s var(--ease-io)}
+#launch.go .trail{height:135vh}
+.launch-in h1{font-size:clamp(2rem,5.4vw,3.5rem);color:var(--sink);text-transform:uppercase}
+.launch-in h1 .serif{text-transform:none;color:var(--blue)}
+.launch-in p{color:var(--sink-2);max-width:42ch;line-height:1.65;font-size:1.02rem}
+.go-btn{
+  margin-top:.3rem;cursor:pointer;border:1px solid var(--sline-2);background:transparent;color:var(--sink);
+  font-family:var(--f-mono);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;
+  padding:1rem 2.3rem;border-radius:99px;position:relative;isolation:isolate;overflow:hidden;
+  transition:color .3s,border-color .3s,transform .3s var(--ease)}
+.go-btn::before{content:"";position:absolute;inset:0;z-index:-1;
+  background:linear-gradient(96deg,var(--blue),var(--green));
+  transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
+.go-btn:hover{border-color:transparent;color:#08121C;transform:translateY(-2px)}
+.go-btn:hover::before{transform:scaleX(1)}
+.skip{background:none;border:0;cursor:pointer;color:var(--sink-3);
+  font-family:var(--f-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  padding:.5rem;transition:color .25s}
+.skip:hover{color:var(--sink-2)}
+#launch.go .launch-in>:not(.ship-hold){opacity:0;transition:opacity .4s var(--ease)}
+
+/* ==========================================================================
+   NAV
+   ========================================================================== */
+header.nav{position:sticky;top:0;z-index:60;background:var(--bg);
+  border-bottom:1px solid var(--line);transition:background .5s var(--ease),border-color .5s var(--ease)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.85rem 0}
+.logo{display:flex;align-items:center;gap:.72rem;text-decoration:none;color:inherit}
+.logo svg{display:block;height:34px;width:auto}
+.logo .wm{display:flex;flex-direction:column;line-height:1}
+.logo .wm b{font-size:1.18rem;font-weight:800;letter-spacing:-.02em;color:var(--accent-ink)}
+html[data-theme="dark"] .logo .wm b{color:#C9D5E8}
+.logo .wm span{font-size:.5rem;letter-spacing:.19em;color:var(--green);font-weight:700;margin-top:.24rem}
+html[data-theme="dark"] .logo .wm span{color:var(--green-l)}
+.nav-links{display:flex;align-items:center;gap:1.7rem}
+.nav-links a{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-2);text-decoration:none;transition:color .25s}
+.nav-links a:hover{color:var(--ink)}
+.toggle{width:52px;height:28px;border-radius:99px;border:1px solid var(--line-2);background:var(--panel);
+  cursor:pointer;position:relative;flex:none}
+.toggle::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(150deg,var(--blue),var(--navy));transition:transform .45s var(--ease),background .45s}
+html[data-theme="light"] .toggle::after{transform:translateX(24px);background:linear-gradient(150deg,#FFD9A0,var(--green))}
+
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero{padding:clamp(3.4rem,11vh,7.5rem) 0 clamp(2.6rem,7vh,5rem)}
+.hero-grid{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
+.hero h1{font-size:clamp(3rem,11vw,10rem);line-height:.84;text-transform:uppercase;letter-spacing:-.055em}
+.hero h1 span{display:block}
+.hero h1 .serif{
+  text-transform:none;
+  background:linear-gradient(96deg,var(--blue-d),var(--green) 55%,var(--navy));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="dark"] .hero h1 .serif{
+  background:linear-gradient(96deg,#B6CDE2,var(--green-l) 52%,#8595DC);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .sub{max-width:47ch;margin-top:2rem;font-size:clamp(1.02rem,1.35vw,1.18rem);line-height:1.65;color:var(--ink-2)}
+.hero .sub b{color:var(--ink);font-weight:600}
+.hero-eyebrow{display:flex;align-items:center;gap:.8rem;margin-bottom:1.9rem;color:var(--ink-3)}
+.hero-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 22%,transparent)}
+.astro-hero{width:clamp(190px,23vw,310px);animation:float 9s ease-in-out infinite;
+  filter:drop-shadow(0 30px 60px rgba(20,30,60,.28))}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-22px) rotate(3deg)}}
+
+/* ==========================================================================
+   IMPULSO — números com gráficos
+   ========================================================================== */
+section{scroll-margin-top:70px}
+.sec{padding:clamp(3rem,8vh,5.5rem) 0}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:2.2rem}
+.sec-head h2{font-size:clamp(1.9rem,3.8vw,2.9rem);max-width:20ch;line-height:1.08}
+.sec-head .note{color:var(--ink-3);white-space:nowrap}
+
+.hero-metric{
+  border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(1.6rem,3.2vw,2.6rem);
+  background:var(--panel);display:grid;grid-template-columns:1fr auto;gap:clamp(1.6rem,4vw,3.4rem);
+  align-items:center;margin-bottom:1.1rem}
+.hm-label{font-size:clamp(1.18rem,1.9vw,1.5rem);line-height:1.4;font-weight:600;max-width:24ch;color:var(--ink)}
+.hm-label small{display:block;margin-top:.8rem;color:var(--ink-2);font-weight:400;
+  font-family:var(--f-mono);font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;line-height:1.6}
+.hm-right{display:flex;align-items:flex-end;gap:clamp(1rem,2.6vw,2.4rem);flex-wrap:wrap}
+/* gráfico de barras antes/depois */
+.bars{display:flex;align-items:flex-end;gap:1.1rem;height:clamp(120px,17vw,175px)}
+.bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:.55rem}
+.bar .col{width:clamp(46px,6vw,74px);border-radius:10px 10px 4px 4px;position:relative;
+  height:var(--h);transition:height 1.3s var(--ease-io)}
+.bar.from .col{background:linear-gradient(180deg,var(--ink-3),color-mix(in srgb,var(--ink-3) 45%,transparent))}
+.bar.to .col{background:linear-gradient(180deg,var(--green-l),var(--green))}
+.bar .v{font-size:clamp(1.3rem,2.3vw,1.9rem);font-weight:800;letter-spacing:-.04em;color:var(--ink)}
+.bar.from .v{color:var(--ink-3)}
+.bar .t{color:var(--ink-3);font-family:var(--f-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase}
+.hm-to{display:flex;flex-direction:column;justify-content:flex-end;gap:.5rem;padding-bottom:.3rem}
+.hm-to .big{font-size:clamp(3.4rem,8vw,6.2rem);font-weight:800;letter-spacing:-.055em;line-height:.86;
+  background:linear-gradient(96deg,var(--green),var(--navy));-webkit-background-clip:text;background-clip:text;color:transparent}
+html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green-l),var(--blue));
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.hm-cap{color:var(--ink-2);font-family:var(--f-mono);font-size:.74rem;letter-spacing:.13em;
+  text-transform:uppercase;max-width:16ch;line-height:1.6}
+
+.m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
+.m-card{border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(1.4rem,2.4vw,1.9rem);
+  background:var(--panel);display:flex;flex-direction:column;gap:.7rem;
+  transition:border-color .3s,transform .35s var(--ease)}
+.m-card:hover{border-color:var(--line-2);transform:translateY(-4px)}
+.m-card .big{font-size:clamp(2.9rem,5.6vw,4.2rem);font-weight:800;letter-spacing:-.05em;line-height:.9;color:var(--ink)}
+.m-card .big .pre{font-size:.48em;color:var(--acc);margin-right:.04em}
+.m-card .lead{font-size:clamp(1.05rem,1.4vw,1.18rem);line-height:1.35;font-weight:600;color:var(--ink)}
+.m-card .sub{color:var(--ink-2);font-size:.92rem;line-height:1.55}
+/* margin-top:auto alinha os três gráficos na mesma base, mesmo com textos
+   de alturas diferentes; a altura mínima iguala o peso visual entre eles */
+.m-viz{margin-top:auto;padding-top:1.1rem;border-top:1px solid var(--line);
+  min-height:88px;display:flex;flex-direction:column;justify-content:center}
+
+/* viz 1 — malha de documentos */
+.dots{display:grid;grid-template-columns:repeat(20,1fr);gap:4px}
+.dots i{display:block;aspect-ratio:1;border-radius:2px;background:var(--line-2);
+  transition:background .4s var(--ease),transform .4s var(--ease)}
+.dots i.on{background:var(--acc)}
+/* viz 2 — 6 blocos de 10 traços */
+.states{display:flex;gap:9px}
+.st-b{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;padding:7px 6px;
+  border:1px solid var(--line);border-radius:8px}
+.st-b u{display:block;height:3px;border-radius:2px;background:var(--line-2);text-decoration:none;
+  transition:background .5s var(--ease)}
+.st-b u.on{background:var(--acc)}
+/* viz 3 — folhas de relatório */
+.sheets{display:flex;flex-direction:column;gap:7px}
+.sheets i{display:block;height:9px;border-radius:4px;background:var(--acc);opacity:.28;
+  width:var(--w);transition:opacity .5s var(--ease),width .9s var(--ease-io)}
+.sheets i.on{opacity:1}
+
+/* ==========================================================================
+   SISTEMAS — painel escuro contido
+   ========================================================================== */
+.panel-space{
+  position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--space);
+  height:clamp(540px,74vh,680px);border:1px solid rgba(143,175,203,.16);
+  box-shadow:0 30px 80px rgba(8,14,30,.28)}
+.panel-space canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.ps-vign{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(115% 80% at 50% 50%,transparent 42%,rgba(4,7,14,.7) 100%)}
+.ps-copy{position:absolute;left:0;top:0;z-index:6;padding:clamp(1.4rem,3vw,2.4rem);
+  max-width:min(38ch,46%);pointer-events:none;transition:opacity .5s var(--ease),transform .6s var(--ease)}
+.panel-space.zoom .ps-copy{opacity:0;transform:translateY(-12px)}
+.ps-copy h3{font-size:clamp(1.5rem,2.7vw,2.15rem);color:var(--sink);line-height:1.06}
+.ps-copy h3 .serif{color:var(--blue)}
+.ps-copy p{margin-top:.9rem;color:var(--sink-2);line-height:1.6;font-size:.98rem;max-width:34ch}
+.ps-hint{position:absolute;left:50%;bottom:1.3rem;transform:translateX(-50%);z-index:6;
+  color:var(--sink-3);font-family:var(--f-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  pointer-events:none;transition:opacity .4s;white-space:nowrap}
+.panel-space.zoom .ps-hint{opacity:0}
+
+.system{position:absolute;inset:0;z-index:3;transition:opacity .6s var(--ease)}
+.panel-space.zoom .system{opacity:0;pointer-events:none}
+.orbits{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.orbits ellipse{fill:none;stroke:var(--sline);stroke-width:1;transition:stroke .35s}
+.orbits ellipse.hot{stroke:var(--sline-2)}
+.sun{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
+.sun-core{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);
+  margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);border-radius:50%;
+  background:radial-gradient(circle at 44% 40%,#FFFFFF 0%,#FBFDFF 42%,#EAF2FA 66%,#CFE0F0 100%);
+  box-shadow:0 0 34px rgba(255,255,255,.55),0 0 90px rgba(214,232,248,.35),0 0 170px rgba(160,200,235,.2);
+  animation:sun-beat 8s ease-in-out infinite;will-change:transform}
+@keyframes sun-beat{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.sun-halo{position:absolute;left:50%;top:50%;width:calc(var(--d)*5);height:calc(var(--d)*5);
+  margin:calc(var(--d)*-2.5) 0 0 calc(var(--d)*-2.5);border-radius:50%;
+  background:radial-gradient(circle,rgba(226,240,252,.16),rgba(226,240,252,0) 60%)}
+.sun-label{position:absolute;left:50%;top:calc(50% + var(--d)*.92);transform:translateX(-50%);
+  font-family:var(--f-mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(226,238,250,.6);white-space:nowrap}
+
+.planet{position:absolute;left:0;top:0;width:0;height:0;border:0;background:none;padding:0;cursor:pointer}
+.pbody{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);
+  margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);border-radius:50%;
+  background:radial-gradient(circle at 34% 30%,var(--c1),var(--c2) 58%,var(--c3) 100%);
+  box-shadow:inset -3px -3px 10px rgba(0,0,0,.45),0 0 16px color-mix(in srgb,var(--c1) 32%,transparent);
+  transition:transform .35s var(--ease),box-shadow .35s var(--ease)}
+.planet:hover .pbody,.planet:focus-visible .pbody{transform:scale(1.3);
+  box-shadow:inset -3px -3px 10px rgba(0,0,0,.4),0 0 30px color-mix(in srgb,var(--c1) 65%,transparent)}
+.planet:focus-visible{outline:none}
+.pring{position:absolute;left:50%;top:50%;width:calc(var(--d)*2.1);height:calc(var(--d)*2.1);
+  margin:calc(var(--d)*-1.05) 0 0 calc(var(--d)*-1.05);border-radius:50%;
+  border:1.5px solid color-mix(in srgb,var(--c1) 52%,transparent);
+  transform:rotate(-16deg) scaleY(.3);pointer-events:none}
+.plabel{position:absolute;left:50%;top:calc(50% + var(--d)*.8);transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.2rem;white-space:nowrap;opacity:.72;
+  transition:opacity .3s var(--ease),transform .3s var(--ease)}
+.plabel b{font-size:.86rem;font-weight:600;color:var(--sink)}
+.plabel i{font-family:var(--f-mono);font-style:normal;font-size:.58rem;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--sink-3);opacity:0;transition:opacity .3s}
+.planet:hover .plabel,.planet:focus-visible .plabel{opacity:1;transform:translateX(-50%) translateY(3px)}
+.planet:hover .plabel i,.planet:focus-visible .plabel i{opacity:1}
+.moon{position:absolute;left:0;top:0;width:0;height:0;pointer-events:none}
+.moon-b{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);
+  margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);border-radius:50%;
+  background:radial-gradient(circle at 36% 32%,#E8EEF6,#A9B7CB 62%,#6B7B93 100%)}
+
+/* ---- zoom + varredura ---- */
+.zoomview{position:absolute;inset:0;z-index:5;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+.panel-space.zoom .zoomview{opacity:1;pointer-events:auto}
+.zsphere{
+  position:absolute;left:0;top:0;width:var(--zd);height:var(--zd);
+  margin:calc(var(--zd)/-2) 0 0 calc(var(--zd)/-2);border-radius:50%;
+  background:radial-gradient(circle at 34% 26%,var(--c1) 0%,var(--c2) 40%,var(--c3) 86%,#05080F 100%);
+  box-shadow:inset -30px -28px 90px rgba(0,0,0,.6),0 0 90px color-mix(in srgb,var(--c1) 32%,transparent);
+  transform:translate3d(var(--zx),var(--zy),0) scale(var(--zs));
+  transition:transform 1.15s var(--ease-io);will-change:transform}
+.zsphere .swirl{position:absolute;inset:-14%;border-radius:50%;
+  background:radial-gradient(42% 34% at 32% 30%,color-mix(in srgb,#fff 22%,transparent),transparent 70%),
+             radial-gradient(36% 28% at 72% 64%,color-mix(in srgb,var(--c3) 68%,transparent),transparent 72%);
+  filter:blur(9px);animation:swirl 46s linear infinite}
+@keyframes swirl{to{transform:rotate(360deg)}}
+
+.scan{position:absolute;left:0;top:0;width:var(--zd);height:var(--zd);
+  margin:calc(var(--zd)/-2) 0 0 calc(var(--zd)/-2);
+  transform:translate3d(var(--zx),var(--zy),0) scale(var(--zs));
+  transition:transform 1.15s var(--ease-io);pointer-events:none;overflow:visible}
+.scan .brk{stroke:var(--sink);stroke-width:2.5;fill:none;opacity:0;
+  transition:opacity .4s var(--ease)}
+.panel-space.scanning .scan .brk{opacity:.9}
+.scan .sweep{stroke:var(--c1);stroke-width:2;opacity:0}
+.panel-space.scanning .scan .sweep{opacity:.85;animation:sweep 1.5s var(--ease-io) forwards}
+@keyframes sweep{0%{transform:translateY(0);opacity:0}
+  10%{opacity:.9}90%{opacity:.9}100%{transform:translateY(var(--zd));opacity:0}}
+.scan .node{opacity:0}
+.panel-space.scanned .scan .node{animation:pop .5s var(--ease) forwards}
+@keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+/* halo escuro: as marcas precisam ler tanto no lado claro quanto no escuro da esfera */
+.scan .node rect{fill:none;stroke:#F2F7FC;stroke-width:1.8}
+.scan .node line{stroke:rgba(242,247,252,.75);stroke-width:1.2}
+.scan .node text{fill:#F2F7FC;font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.1em;
+  stroke:rgba(5,9,18,.9);stroke-width:3.5;paint-order:stroke fill}
+.scan .node,.scan .brk{filter:drop-shadow(0 0 3px rgba(5,9,18,.85))}
+
+.zbody{position:absolute;right:0;top:0;height:100%;width:min(52%,540px);z-index:6;
+  display:flex;flex-direction:column;justify-content:center;gap:.85rem;
+  padding:clamp(1.5rem,3vw,2.6rem);
+  background:linear-gradient(270deg,color-mix(in srgb,var(--space) 95%,transparent) 40%,transparent);
+  opacity:0;transform:translateX(22px);transition:opacity .6s var(--ease),transform .7s var(--ease)}
+.panel-space.scanned .zbody{opacity:1;transform:none}
+.zpill{display:inline-flex;align-items:center;gap:.5rem;padding:.42rem .8rem;border-radius:99px;
+  border:1px solid var(--sline-2);color:var(--sink-2);align-self:flex-start;
+  font-family:var(--f-mono);font-size:.66rem;letter-spacing:.15em;text-transform:uppercase}
+.zpill .bt{width:7px;height:7px;border-radius:50%;background:var(--green-l)}
+.zpill.wip .bt{background:#E8B75A;animation:blink 1.9s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+.zbody h4{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:800;letter-spacing:-.05em;color:var(--sink);line-height:1}
+.zbody .kick{font-family:var(--f-serif);font-style:italic;font-size:clamp(1rem,1.5vw,1.2rem);color:var(--blue)}
+.zbody .desc{font-size:.98rem;line-height:1.65;color:var(--sink-2);max-width:42ch}
+.zbody .desc b{color:var(--sink);font-weight:600}
+.zkpis{display:flex;border:1px solid var(--sline);border-radius:12px;overflow:hidden;background:rgba(9,14,26,.55)}
+.zkpis .k{flex:1;padding:.75rem .9rem;border-right:1px solid var(--sline)}
+.zkpis .k:last-child{border-right:0}
+.zkpis .k b{display:block;font-size:1.45rem;font-weight:800;letter-spacing:-.04em;color:var(--sink)}
+.zkpis .k span{display:block;margin-top:.28rem;color:var(--sink-3);
+  font-family:var(--f-mono);font-size:.6rem;letter-spacing:.11em;text-transform:uppercase;line-height:1.5}
+.zback{align-self:flex-start;background:none;border:0;cursor:pointer;color:var(--sink-2);
+  font-family:var(--f-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  padding:.45rem 0;transition:color .25s}
+.zback:hover{color:var(--sink)}
+
+.switcher{position:absolute;left:50%;top:1.1rem;transform:translateX(-50%);z-index:7;
+  display:flex;gap:.3rem;padding:.34rem;border:1px solid var(--sline);border-radius:99px;
+  background:rgba(9,14,26,.72);max-width:94%;overflow:auto;scrollbar-width:none;
+  opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
+.switcher::-webkit-scrollbar{display:none}
+.panel-space.zoom .switcher{opacity:1;pointer-events:auto}
+.switcher button{display:flex;align-items:center;gap:.45rem;white-space:nowrap;cursor:pointer;
+  background:none;border:0;border-radius:99px;padding:.45rem .85rem;color:var(--sink-3);
+  font-family:var(--f-mono);font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;
+  transition:color .25s,background .25s}
+.switcher button .sw{width:8px;height:8px;border-radius:50%;background:var(--sc);flex:none}
+.switcher button:hover{color:var(--sink-2);background:rgba(143,175,203,.08)}
+.switcher button.on{color:var(--sink);background:rgba(143,175,203,.15)}
+
+/* ==========================================================================
+   HORIZONTE
+   ========================================================================== */
+.horizonte{--hzh:clamp(17rem,30vh,23rem);
+  position:relative;overflow:hidden;padding-bottom:calc(var(--hzh) + 5rem)}
+.hz-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:clamp(2rem,5vw,4.5rem);align-items:start;
+  position:relative;z-index:3}
+/* respiro para o acento do "É" não bater no "g" da linha de cima */
+.hz-grid h2{font-size:clamp(1.85rem,4vw,3rem);line-height:1.26}
+.hz-grid h2 .serif{display:inline-block}
+.hz-grid p{margin-top:1.4rem;color:var(--ink-2);line-height:1.75;max-width:46ch;font-size:1.02rem}
+
+/* lista expansível */
+.projlist{border-top:1px solid var(--line)}
+.pj{border-bottom:1px solid var(--line)}
+.pj>button{width:100%;background:none;border:0;cursor:pointer;text-align:left;color:inherit;
+  display:flex;align-items:center;gap:1rem;padding:1.05rem .2rem;font:inherit;transition:color .25s}
+.pj>button:hover{color:var(--accent-ink)}
+html[data-theme="dark"] .pj>button:hover{color:var(--blue)}
+.pj .pdot{width:11px;height:11px;border-radius:50%;background:var(--pc);flex:none}
+.pj .pname{font-weight:650;font-size:1.06rem;letter-spacing:-.015em;flex:1}
+.pj .pstat{color:var(--ink-3);font-family:var(--f-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase}
+.pj .pchev{width:14px;height:14px;flex:none;position:relative;transition:transform .4s var(--ease)}
+.pj .pchev::before,.pj .pchev::after{content:"";position:absolute;background:var(--ink-3);border-radius:2px}
+.pj .pchev::before{left:0;top:6px;width:14px;height:2px}
+.pj .pchev::after{left:6px;top:0;width:2px;height:14px;transition:opacity .4s var(--ease)}
+.pj.open .pchev{transform:rotate(180deg)}
+.pj.open .pchev::after{opacity:0}
+.pj .pbodyx{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
+.pj.open .pbodyx{grid-template-rows:1fr}
+.pj .pinner{overflow:hidden}
+.pmetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;padding:0 .2rem 1.15rem}
+.pm{border:1px solid var(--line);border-radius:12px;padding:.8rem .85rem;background:var(--panel)}
+.pm b{display:block;font-size:1.45rem;font-weight:800;letter-spacing:-.04em;color:var(--ink);line-height:1}
+.pm span{display:block;margin-top:.4rem;color:var(--ink-3);
+  font-family:var(--f-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;line-height:1.5}
+
+/* Horizonte: a esfera vive numa faixa no rodapé da seção e é recortada por ela,
+   então a curva cruza a tela em vez de engolir o texto. */
+.hz-horizon{position:absolute;left:0;right:0;bottom:0;height:var(--hzh);overflow:hidden;z-index:1}
+.hz-sphere{
+  position:absolute;left:50%;top:0;width:200%;height:520%;transform:translateX(-50%);
+  border-radius:50%;
+  /* só a faixa do topo aparece, então os stops ficam comprimidos no início —
+     um radial normal jogaria toda a cor para fora do campo visível */
+  background:
+    radial-gradient(ellipse 24% 3.5% at 30% .8%,rgba(255,255,255,.34),transparent 74%),
+    linear-gradient(180deg,#CFE0EE 0%,var(--blue) 2%,var(--blue-d) 6%,#3A5C84 10%,var(--navy) 15%,#141A3C 21%,#070B1A 30%)}
+html[data-theme="dark"] .hz-sphere{
+  background:
+    radial-gradient(ellipse 24% 3.5% at 30% .8%,rgba(190,216,238,.3),transparent 74%),
+    linear-gradient(180deg,#9CBBD5 0%,var(--blue-d) 2.5%,#365780 7%,var(--navy) 13%,#111634 19%,#05080F 28%)}
+/* fio de atmosfera no limbo */
+.hz-sphere::after{content:"";position:absolute;inset:0;border-radius:50%;
+  box-shadow:inset 0 4px 0 0 rgba(214,232,246,.9),
+             0 -8px 40px color-mix(in srgb,var(--blue) 55%,transparent)}
+.hz-grain{position:absolute;left:24%;top:3.4%;width:13%;aspect-ratio:3.2/1;border-radius:50%;
+  background:color-mix(in srgb,var(--green) 62%,transparent);filter:blur(22px);opacity:.5}
+.hz-grain.b{left:60%;top:5.6%;width:10%;background:color-mix(in srgb,var(--blue) 55%,transparent);opacity:.42}
+
+/* astronauta com corda folgada */
+.hz-scene{position:absolute;left:0;right:0;bottom:0;height:calc(var(--hzh) + 9rem);z-index:2;pointer-events:none}
+.rope{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.rope path{fill:none;stroke:var(--ink-2);stroke-width:2.2;stroke-linecap:round;opacity:.75}
+html[data-theme="dark"] .rope path{stroke:#8FA2BE;opacity:.8}
+.diver{position:absolute;width:clamp(112px,13vw,168px);
+  transform:translate3d(var(--dx,0),var(--dy,0),0);
+  animation:bobble 7s ease-in-out infinite;will-change:transform;
+  filter:drop-shadow(0 14px 26px rgba(10,16,36,.35))}
+@keyframes bobble{0%,100%{rotate:-6deg}50%{rotate:7deg}}
+
+/* ==========================================================================
+   RODAPÉ
+   ========================================================================== */
+footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;z-index:4;background:var(--bg)}
+.foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--ink-3);
+  font-family:var(--f-mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase}
+
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
+@media (max-width:980px){
+  .hero-grid{grid-template-columns:1fr}
+  .astro-hero{display:none}
+  .hero-metric{grid-template-columns:1fr;gap:1.6rem}
+  .m-grid{grid-template-columns:1fr}
+  .hz-grid{grid-template-columns:1fr}
+  .sec-head{flex-direction:column;align-items:flex-start;gap:.5rem}
+  .nav-links{gap:1.1rem}
+  .nav-links a{font-size:.68rem;letter-spacing:.1em}
+  .ps-copy{max-width:none;padding-right:26%}
+  .ps-copy p{display:none}
+  .zbody{width:100%;height:62%;top:auto;bottom:0;justify-content:flex-end;gap:.6rem;padding-bottom:1.3rem;
+    background:linear-gradient(0deg,color-mix(in srgb,var(--space) 97%,transparent) 68%,transparent)}
+  .zbody h4{font-size:1.85rem}
+  .zbody .desc{font-size:.9rem;line-height:1.55}
+  .zkpis .k b{font-size:1.2rem}
+  .panel-space{height:clamp(560px,86vh,720px)}
+}
+@media (max-width:620px){
+  .dots{grid-template-columns:repeat(10,1fr)}
+  .pmetrics{grid-template-columns:1fr}
+  .nav-links{display:none}
+  .ps-copy{padding-right:1.2rem}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.15s !important}
+  [data-r]{opacity:1;transform:none}
+}
+</style>
+</head>
+<body class="locked">
+
+<!-- ================= LANÇAMENTO ================= -->
+<div id="launch">
+  <canvas class="stars" aria-hidden="true"></canvas>
+  <div class="launch-in">
+    <span class="brandline lab-s" data-r>Hinove Fertilizantes Especiais · Núcleo Fiscal</span>
+    <div class="ship-hold" data-r>
+      <span class="trail" aria-hidden="true"></span>
+      <svg class="ship" viewBox="0 0 220 300" aria-label="Nave Hinove">
+        <defs><clipPath id="hole"><circle cx="110" cy="112" r="38"/></clipPath></defs>
+        <g class="flame">
+          <path d="M110 246c16 12 26 28 26 44 0 0-11-8-26-8s-26 8-26 8c0-16 10-32 26-44z" fill="#F6C56A"/>
+          <path d="M110 258c9 8 15 18 15 28 0 0-6-5-15-5s-15 5-15 5c0-10 6-20 15-28z" fill="#FFF0CB"/>
+        </g>
+        <path d="M62 176c-22 12-32 34-30 60 16-4 28-14 36-28z" fill="#2A9165"/>
+        <path d="M158 176c22 12 32 34 30 60-16-4-28-14-36-28z" fill="#8FAFCB"/>
+        <path d="M110 12c30 26 44 66 44 112v90H66v-90C66 78 80 38 110 12z" fill="#F2F5F9"/>
+        <path d="M130 20c17 26 24 60 24 104v90h-24z" fill="#D9E2EC"/>
+        <path d="M110 12c13 11 23 26 30 44H80c7-18 17-33 30-44z" fill="#343F73"/>
+        <rect x="76" y="212" width="68" height="26" rx="10" fill="#343F73"/>
+        <rect x="88" y="238" width="44" height="12" rx="6" fill="#2C355F"/>
+        <circle cx="110" cy="112" r="38" fill="#0E1424"/>
+        <g clip-path="url(#hole)">
+          <circle cx="96" cy="100" r="26" fill="#8FAFCB"/>
+          <circle cx="120" cy="110" r="23" fill="#343F73" opacity=".9"/>
+          <circle cx="101" cy="126" r="17" fill="#2A9165" opacity=".92"/>
+        </g>
+        <circle cx="110" cy="112" r="38" fill="none" stroke="#F2F5F9" stroke-width="7"/>
+        <circle cx="110" cy="112" r="42" fill="none" stroke="#C6D2E0" stroke-width="2"/>
+        <rect x="70" y="188" width="80" height="9" rx="4.5" fill="#2A9165"/>
+      </svg>
+    </div>
+    <h1 data-r>Trabalho que roda<br><span class="serif">sozinho.</span></h1>
+    <p data-r>Seis rotinas fiscais em órbita — conferência, envio, expedição e classificação rodando sem a mão do analista.</p>
+    <button class="go-btn" id="goBtn" data-r><span>Decolar</span></button>
+    <button class="skip" id="skipBtn" data-r>pular introdução</button>
+  </div>
+</div>
+
+<!-- ================= NAV ================= -->
+<header class="nav">
+  <div class="wrap nav-in">
+    <a class="logo" href="#top" aria-label="Hinove Fertilizantes Especiais">
+      <svg viewBox="0 0 120 100" aria-hidden="true">
+        <circle cx="40" cy="38" r="38" fill="#8FAFCB"/>
+        <circle cx="74" cy="52" r="34" fill="#343F73" opacity=".88"/>
+        <circle cx="45" cy="72" r="26" fill="#2A9165" opacity=".88"/>
+      </svg>
+      <span class="wm"><b>HINOVE</b><span>FERTILIZANTES ESPECIAIS</span></span>
+    </a>
+    <nav class="nav-links">
+      <a href="#impulso">Impulso</a>
+      <a href="#sistemas">Sistemas</a>
+      <a href="#horizonte">Horizonte</a>
+    </nav>
+    <button class="toggle" id="themeBtn" aria-label="Alternar tema claro/escuro"></button>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- ================= HERO ================= -->
+<section class="hero wrap">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow lab" data-r><span class="dot"></span><span>Núcleo Fiscal · Automação Interna</span></div>
+      <h1 data-r><span>Trabalho</span><span>que roda</span><span class="serif">sozinho.</span></h1>
+      <p class="sub" data-r>Seis sistemas que assumiram a parte repetitiva da rotina fiscal da Hinove —
+        conferência, envio, expedição e classificação. O analista deixou de <b>procurar erro</b>
+        para voltar a <b>analisar número</b>.</p>
+    </div>
+    <svg class="astro-hero" viewBox="0 0 240 260" aria-hidden="true" data-r>
+      <defs>
+        <linearGradient id="suit" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D6DEEA"/></linearGradient>
+        <linearGradient id="flameG" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#F5B841"/><stop offset="1" stop-color="#E2542F"/></linearGradient>
+      </defs>
+      <path d="M64 196c-22 6-38 22-44 42 22-4 40-14 52-28z" fill="url(#flameG)"/>
+      <g transform="rotate(-32 130 180)">
+        <path d="M92 168h84c22 0 40 10 48 22-8 12-26 22-48 22H92c-14 0-24-10-24-22s10-22 24-22z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M176 168c22 0 40 10 48 22-8 12-26 22-48 22z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <circle cx="128" cy="190" r="16" fill="#5EC8DE" stroke="#2B3050" stroke-width="5"/>
+        <path d="M96 168c-6-14-4-24 2-30 8 6 12 16 12 30z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M96 212c-6 14-4 24 2 30 8-6 12-16 12-30z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      </g>
+      <path d="M96 128c-14 6-22 20-20 36 2 14 14 24 30 24h30c16 0 26-12 26-26 0-18-12-32-30-36z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M150 126c10-16 26-22 38-16 10 5 12 18 4 26-8 8-22 8-30 0z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M92 150c-12 4-18 16-14 26 4 9 16 12 24 6" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="128" cy="76" r="52" fill="url(#suit)" stroke="#2B3050" stroke-width="5"/>
+      <circle cx="128" cy="76" r="40" fill="#232A48" stroke="#2B3050" stroke-width="4"/>
+      <ellipse cx="112" cy="60" rx="15" ry="9" fill="#fff" opacity=".85" transform="rotate(-32 112 60)"/>
+      <circle cx="150" cy="86" r="6" fill="#fff" opacity=".7"/>
+      <rect x="112" y="150" width="34" height="22" rx="7" fill="#8FAFCB" stroke="#2B3050" stroke-width="4"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ================= IMPULSO ================= -->
+<section class="sec wrap" id="impulso">
+  <div class="sec-head">
+    <h2 data-r>O que a automação <span class="serif">devolveu</span> para o time.</h2>
+    <span class="note lab" data-r>Indicadores internos</span>
+  </div>
+
+  <div class="hero-metric" id="heroMetric" data-r>
+    <div class="hm-label">
+      Horas semanais gastas em relatórios e conferências repetitivas.
+      <small>Por analista · média do núcleo fiscal</small>
+    </div>
+    <div class="hm-right">
+      <div class="bars">
+        <div class="bar from"><span class="v">20h</span><span class="col" style="--h:0%" data-h="100%"></span><span class="t">antes</span></div>
+        <div class="bar to"><span class="v">2h30</span><span class="col" style="--h:0%" data-h="12.5%"></span><span class="t">depois</span></div>
+      </div>
+      <div class="hm-to">
+        <span class="big" id="hmDrop">−87,5%</span>
+        <span class="hm-cap">de queda no tempo gasto</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="m-grid">
+    <div class="m-card" style="--acc:#5E86AC" data-r>
+      <div class="big" data-count="8000">0</div>
+      <div class="lead">documentos conferidos em 2 minutos</div>
+      <div class="sub">O que era uma tarde inteira de conferência cabe num intervalo de café.</div>
+      <div class="m-viz"><div class="dots" id="dotsViz"></div></div>
+    </div>
+    <div class="m-card" style="--acc:#343F73" data-r>
+      <div class="big"><span class="pre">+</span><span data-count="60">0</span></div>
+      <div class="lead">regras tributárias mapeadas</div>
+      <div class="sub">Aplicadas em mais de 6 estados do Brasil, sem consulta manual.</div>
+      <div class="m-viz"><div class="states" id="statesViz"></div></div>
+    </div>
+    <div class="m-card" style="--acc:#2A9165" data-r>
+      <div class="big"><span class="pre">+</span><span data-count="5">0</span></div>
+      <div class="lead">relatórios automatizados</div>
+      <div class="sub">O analista recebe o resultado pronto e gasta o tempo na análise.</div>
+      <div class="m-viz"><div class="sheets" id="sheetsViz"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SISTEMAS ================= -->
+<section class="sec wrap" id="sistemas">
+  <div class="sec-head">
+    <h2 data-r>Seis rotinas em <span class="serif">órbita.</span></h2>
+    <span class="note lab" data-r>Clique num planeta para aproximar</span>
+  </div>
+
+  <div class="panel-space" id="panel" data-r>
+    <canvas class="stars" id="panelStars" aria-hidden="true"></canvas>
+
+    <div class="ps-copy">
+      <h3>O núcleo e o que <span class="serif">gira</span> em volta.</h3>
+      <p>Cada planeta é um sistema que assumiu uma tarefa repetitiva do fechamento fiscal.</p>
+    </div>
+
+    <div class="system" id="systemLayer">
+      <svg class="orbits" id="orbitsSvg" aria-hidden="true"></svg>
+      <div class="sun" id="sunEl" style="--d:70px">
+        <span class="sun-halo"></span><span class="sun-core"></span>
+        <span class="sun-label">Núcleo Fiscal</span>
+      </div>
+    </div>
+
+    <span class="ps-hint">Passe o mouse para acelerar · clique para aproximar</span>
+    <div class="ps-vign"></div>
+
+    <div class="zoomview" id="zoomView">
+      <div class="zsphere" id="zsphere"><span class="swirl"></span></div>
+      <svg class="scan" id="scanSvg" viewBox="0 0 400 400" preserveAspectRatio="none"></svg>
+      <div class="zbody" id="zbody"></div>
+    </div>
+    <div class="switcher" id="switcher"></div>
+  </div>
+</section>
+
+<!-- ================= HORIZONTE ================= -->
+<section class="sec horizonte" id="horizonte">
+  <div class="wrap hz-grid">
+    <div>
+      <h2 data-r>Automatizar não é cortar gente.<br><span class="serif">É devolver o tempo</span> para pensar.</h2>
+      <p data-r>Cada rotina que entra em órbita libera horas que voltam para conferência analítica,
+        planejamento tributário e recuperação de crédito — o trabalho que só uma pessoa faz bem.
+        As próximas missões seguem a mesma regra: primeiro o que é repetitivo, previsível e auditável.</p>
+    </div>
+    <div class="projlist" id="projList" data-r></div>
+  </div>
+
+  <div class="hz-horizon" aria-hidden="true">
+    <div class="hz-sphere"><span class="hz-grain"></span><span class="hz-grain b"></span></div>
+  </div>
+  <div class="hz-scene" id="hzScene" aria-hidden="true">
+    <svg class="rope"><path id="ropePath" d=""/></svg>
+    <svg class="diver" id="diver" viewBox="0 0 160 190">
+      <rect x="86" y="120" width="24" height="46" rx="12" fill="#D9E2EC"/>
+      <rect x="96" y="74" width="46" height="22" rx="11" fill="#D9E2EC" transform="rotate(24 96 74)"/>
+      <rect x="44" y="74" width="30" height="44" rx="12" fill="#343F73"/>
+      <rect x="50" y="84" width="18" height="8" rx="4" fill="#2A9165"/>
+      <rect x="56" y="120" width="26" height="50" rx="13" fill="#F2F5F9"/>
+      <rect x="54" y="158" width="32" height="18" rx="9" fill="#E3EAF2"/>
+      <rect x="52" y="70" width="60" height="60" rx="24" fill="#F2F5F9"/>
+      <rect x="68" y="88" width="30" height="20" rx="7" fill="#8FAFCB"/>
+      <circle cx="76" cy="98" r="3.4" fill="#2A9165"/><circle cx="88" cy="98" r="3.4" fill="#343F73"/>
+      <rect x="96" y="52" width="44" height="22" rx="11" fill="#F2F5F9" transform="rotate(-28 96 52)"/>
+      <circle cx="134" cy="34" r="13" fill="#F2F5F9"/>
+      <circle cx="82" cy="48" r="40" fill="#F2F5F9"/>
+      <circle cx="82" cy="48" r="30" fill="#28305A"/>
+      <ellipse cx="70" cy="36" rx="11" ry="7" fill="#FFFFFF" opacity=".85" transform="rotate(-30 70 36)"/>
+      <circle cx="96" cy="58" r="4.6" fill="#FFFFFF" opacity=".6"/>
+    </svg>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot">
+    <span>Hinove Fertilizantes Especiais · Núcleo Fiscal</span>
+    <span>Números ilustrativos · vitrine interna</span>
+  </div>
+</footer>
+</main>
+
+<script>
+/* ==========================================================================
+   DADOS
+   ========================================================================== */
+const PROJECTS=[
+  { id:'xmlbot', name:'XMLBot', status:'Em produção', wip:false,
+    c:['#7FD9C0','#2E9E8B','#0E4A45'], f:.34, r:11, phase:.4,
+    kick:'Nenhuma tag passa batida.',
+    desc:'Validador de tags de XML. Lê o arquivo campo a campo e aponta estrutura inválida, tag ausente e valor fora do padrão <b>antes</b> do documento seguir para escrituração.',
+    scan:['TAGS','SCHEMA','CAMPOS','ASSINATURA'],
+    kpis:[['100%','dos XML validados na entrada'],['&lt; 1s','por arquivo'],['0','erro de estrutura']],
+    metrics:[['48h','horas liberadas / mês'],['9.500','documentos / mês'],['100%','precisão apurada']] },
+
+  { id:'autoreinf', name:'AutoReinf', status:'Em produção', wip:false,
+    c:['#7E8BD2','#343F73','#151B3A'], f:.47, r:14, phase:2.1,
+    kick:'Do arquivo ao recibo, sem digitação.',
+    desc:'Monta e transmite automaticamente os eventos de serviços tomados à Receita Federal. Uma rotina <b>100% manual</b> — e por isso exposta a erro de digitação — passou a rodar em lote, com trilha de retorno.',
+    scan:['EVENTO','CNPJ','RETENÇÃO','RECIBO'],
+    kpis:[['2.800','eventos / mês'],['96h','liberadas / mês'],['0','erros de digitação']],
+    metrics:[['96h','horas liberadas / mês'],['2.800','documentos / mês'],['100%','precisão apurada']] },
+
+  { id:'gerarpendentes', name:'GerarPendentes', status:'Em produção', wip:false,
+    c:['#C0A2E0','#7A56B0','#33195C'], f:.60, r:13, phase:4.2,
+    kick:'O que ficou para trás, na sua mesa.',
+    desc:'Gera o relatório de documentos fiscais pendentes e mostra onde o processo travou — captando <b>falhas de processo, de escrituração e de pagamento</b> antes que virem passivo.',
+    scan:['PROCESSO','ESCRITURAÇÃO','PAGAMENTO','PRAZO'],
+    kpis:[['3','tipos de falha rastreados'],['diário','ciclo de geração'],['100%','da base varrida']],
+    metrics:[['60h','horas liberadas / mês'],['5.400','documentos / mês'],['97%','precisão apurada']] },
+
+  { id:'fiscalbot', name:'FiscalBot', status:'Em produção', wip:false,
+    c:['#A9C6DE','#5E86AC','#20325A'], f:.74, r:18, phase:1.1, ring:true,
+    kick:'O revisor que nunca pisca.',
+    desc:'Varre a base de notas em busca de inconsistências e desvios de conformidade tributária. Elimina <b>99% das validações gerais</b> — CFOP, CST, alíquota, base e cadastro — e entrega ao analista só o que exige julgamento.',
+    scan:['CFOP','CST','ALÍQUOTA','CADASTRO'],
+    kpis:[['99%','sem toque humano'],['8.000','docs em 2 minutos'],['+60','regras aplicadas']],
+    metrics:[['320h','horas liberadas / mês'],['14.000','documentos / mês'],['99%','precisão apurada']] },
+
+  { id:'faturabot', name:'FaturaBot', status:'Em produção', wip:false,
+    c:['#BFD8EA','#7FA6C8','#2A4A70'], f:.88, r:16, phase:5.4, moon:{r:5,dist:2.7,speed:1.6},
+    kick:'A expedição fecha sozinha.',
+    desc:'Quatro relatórios de expedição gerados automaticamente. Reduz a margem de erro manual no fechamento e <b>captura erros possíveis</b> antes do faturamento sair — a lua ao redor dele é a conferência que roda logo depois.',
+    scan:['EXPEDIÇÃO','VOLUMES','FATURA','DIVERGÊNCIA'],
+    kpis:[['4','relatórios de expedição'],['~0','margem de erro manual'],['100%','conferido antes da emissão']],
+    metrics:[['72h','horas liberadas / mês'],['3.200','documentos / mês'],['98%','precisão apurada']] },
+
+  { id:'cteauto', name:'CT-e Auto v2', status:'Em construção', wip:true,
+    c:['#4FC38C','#2A9165','#0C452D'], f:1, r:14, phase:3.3,
+    kick:'A próxima órbita.',
+    desc:'Identifica os conhecimentos de transporte de fretes tomados e faz a classificação tributária de ponta a ponta — sem planilha intermediária. Hoje em piloto, com meta de <b>90% de classificação sem intervenção</b>.',
+    scan:['CT-E','FRETE','CLASSIF.','CRÉDITO'],
+    kpis:[['68%','do escopo concluído'],['4.500','CT-e / mês no alvo'],['piloto','fase atual']],
+    metrics:[['64h','horas projetadas / mês'],['4.500','documentos / mês'],['90%','precisão alvo']] }
+];
+const RED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ==========================================================================
+   TEMA
+   ========================================================================== */
+(function(){
+  const root=document.documentElement,btn=document.getElementById('themeBtn');
+  root.dataset.theme=localStorage.getItem('hinove-theme')||'dark';
+  btn.addEventListener('click',()=>{
+    root.dataset.theme=root.dataset.theme==='dark'?'light':'dark';
+    localStorage.setItem('hinove-theme',root.dataset.theme);
+  });
+})();
+
+/* ==========================================================================
+   REVEAL — elementos populando a tela
+   ========================================================================== */
+const Reveal=(function(){
+  function show(scope,base){
+    const els=[...scope.querySelectorAll('[data-r]')].filter(e=>!e.classList.contains('in'));
+    els.forEach((el,i)=>{el.style.transitionDelay=((base||0)+i*90)+'ms';el.classList.add('in');});
+  }
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return; io.unobserve(e.target);
+    const sibs=[...e.target.parentElement.querySelectorAll(':scope > [data-r]')];
+    e.target.style.transitionDelay=(Math.max(0,sibs.indexOf(e.target))*90)+'ms';
+    e.target.classList.add('in');
+  }),{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+  function watch(root){root.querySelectorAll('[data-r]').forEach(el=>io.observe(el));}
+  return {show,watch};
+})();
+Reveal.show(document.getElementById('launch'),120);
+
+/* ==========================================================================
+   ESTRELAS (+ warp de velocidade da luz)
+   ========================================================================== */
+function makeStars(canvas){
+  const ctx=canvas.getContext('2d');
+  let stars=[],w=0,h=0,t=0,last=0,warp=0,wt=-1;   /* wt = tempo desde o disparo */
+  const dpr=Math.min(devicePixelRatio||1,1.5);
+  function build(){
+    const r=canvas.getBoundingClientRect();
+    if(!r.width||!r.height) return;
+    w=canvas.width=r.width*dpr; h=canvas.height=r.height*dpr;
+    const n=Math.round((r.width*r.height)/10000);
+    stars=Array.from({length:n},()=>({
+      x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.4+.35)*dpr,
+      a:Math.random()*.65+.2,sp:(Math.random()*.13+.03)*dpr,ph:Math.random()*6.283}));
+  }
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(document.hidden||now-last<32) return;
+    const dt=Math.min((now-last)/1000,.06); last=now; t+=dt;
+    /* envelope: sobe rápido, segura, e desacelera — dá tempo do olho ver */
+    if(wt>=0){
+      wt+=dt;
+      if(wt>1.25){wt=-1;warp=0;}
+      else{
+        const rise=Math.min(wt/.26,1);
+        const fall=wt<.58?1:Math.max(0,1-(wt-.58)/.62);
+        warp=Math.min(rise,fall);
+      }
+    }
+    ctx.clearRect(0,0,w,h);
+    const cx=w/2,cy=h/2;
+    for(const s of stars){
+      s.y-=s.sp; if(s.y<-3){s.y=h+3;s.x=Math.random()*w;}
+      const tw=.55+.45*Math.sin(t*1.3+s.ph);
+      const alpha=(s.a*tw).toFixed(3);
+      if(warp>.02){
+        /* rastro radial: quanto mais longe do centro, mais comprido */
+        const dx=s.x-cx,dy=s.y-cy;
+        const len=warp*.85;
+        ctx.strokeStyle='rgba(206,222,240,'+alpha+')';
+        ctx.lineWidth=s.r; ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(s.x,s.y);
+        ctx.lineTo(s.x+dx*len,s.y+dy*len); ctx.stroke();
+      }else{
+        ctx.beginPath();
+        ctx.fillStyle='rgba(206,222,240,'+alpha+')';
+        ctx.arc(s.x,s.y,s.r,0,6.2832); ctx.fill();
+      }
+    }
+  }
+  build(); requestAnimationFrame(frame);
+  addEventListener('resize',build,{passive:true});
+  return {rebuild:build,warp(){ if(!RED) wt=0; }};
+}
+const launchStars=makeStars(document.querySelector('#launch canvas'));
+const panelStars=makeStars(document.getElementById('panelStars'));
+
+/* ==========================================================================
+   SISTEMA SOLAR
+   ========================================================================== */
+const Solar=(function(){
+  const panel=document.getElementById('panel');
+  const layer=document.getElementById('systemLayer');
+  const svg=document.getElementById('orbitsSvg');
+  const sunEl=document.getElementById('sunEl');
+  const NS='http://www.w3.org/2000/svg';
+  let W=0,H=0,cx=0,cy=0,R=0,scale=1;
+  let bloom=0,bloomTarget=1,running=false,visible=true,paused=false;
+  let hovered=null,spd=1,spdT=1;
+  const nodes=[];
+
+  PROJECTS.forEach(p=>{
+    const el=document.createElement('button');
+    el.className='planet'; el.type='button'; el.dataset.id=p.id;
+    el.setAttribute('aria-label',p.name+' — '+p.status);
+    el.style.setProperty('--c1',p.c[0]); el.style.setProperty('--c2',p.c[1]); el.style.setProperty('--c3',p.c[2]);
+    el.innerHTML=(p.ring?'<span class="pring"></span>':'')+'<span class="pbody"></span>'+
+      '<span class="plabel"><b>'+p.name+'</b><i>'+p.status+'</i></span>';
+    layer.appendChild(el);
+    const ell=document.createElementNS(NS,'ellipse'); svg.appendChild(ell);
+    let moonEl=null;
+    if(p.moon){moonEl=document.createElement('span');moonEl.className='moon';
+      moonEl.innerHTML='<span class="moon-b"></span>';layer.appendChild(moonEl);}
+    /* devagar: uma volta interna leva ~2 min */
+    const w=(0.085/Math.pow(p.f,1.5));
+    nodes.push({p,el,ell,moonEl,ang:p.phase,w,x:0,y:0,ma:Math.random()*6.283,zoomed:false});
+    el.addEventListener('click',()=>Zoom.enter(p.id));
+    el.addEventListener('pointerenter',()=>{hovered=p.id;ell.classList.add('hot');});
+    el.addEventListener('pointerleave',()=>{if(hovered===p.id)hovered=null;ell.classList.remove('hot');});
+    el.addEventListener('focus',()=>{hovered=p.id;ell.classList.add('hot');});
+    el.addEventListener('blur',()=>{if(hovered===p.id)hovered=null;ell.classList.remove('hot');});
+  });
+
+  /* mouse sobre o painel → acelera */
+  panel.addEventListener('pointerenter',()=>{spdT=2.3;});
+  panel.addEventListener('pointerleave',()=>{spdT=1;});
+
+  const TILT=.36;
+  function measure(){
+    const r=panel.getBoundingClientRect();
+    W=r.width;H=r.height;
+    const narrow=W<980;
+    cx=W*(narrow?.5:.57); cy=H*(narrow?.56:.53);
+    R=Math.min(W*.38,H*.58);
+    scale=Math.max(.62,Math.min(1.25,Math.min(W,H)/760));
+    sunEl.style.transform='translate3d('+cx+'px,'+cy+'px,0)';
+    sunEl.style.setProperty('--d',(56*scale).toFixed(1)+'px');
+    nodes.forEach(n=>{
+      const a=R*n.p.f;n.a=a;n.b=a*TILT;
+      n.ell.setAttribute('cx',cx);n.ell.setAttribute('cy',cy);
+      n.ell.setAttribute('rx',a);n.ell.setAttribute('ry',n.b);
+      n.el.style.setProperty('--d',(n.p.r*2*scale).toFixed(1)+'px');
+      if(n.moonEl) n.moonEl.style.setProperty('--d',(n.p.moon.r*2*scale).toFixed(1)+'px');
+    });
+    step(0);
+  }
+
+  function step(dt){
+    if(RED) bloom=bloomTarget; else bloom+=(bloomTarget-bloom)*Math.min(dt*2.2,1);
+    svg.style.opacity=bloom.toFixed(3);
+    spd+=(spdT-spd)*Math.min(dt*2.5,1);
+    for(const n of nodes){
+      if(n.zoomed) continue;
+      const slow=hovered===n.p.id?.35:1;
+      if(!RED) n.ang+=n.w*dt*slow*spd;
+      const co=Math.cos(n.ang),si=Math.sin(n.ang);
+      const x=cx+co*n.a*bloom,y=cy+si*n.b*bloom;
+      n.x=x;n.y=y;
+      const depth=(si+1)/2, sc=.82+.30*depth;
+      n.el.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) scale('+sc.toFixed(3)+')';
+      n.el.style.opacity=(.62+.38*depth).toFixed(3);
+      n.el.style.zIndex=String(100+Math.round(si*40));
+      if(n.moonEl){
+        if(!RED) n.ma+=n.p.moon.speed*dt*spd;
+        const md=n.p.r*n.p.moon.dist*scale;
+        n.moonEl.style.transform='translate3d('+(x+Math.cos(n.ma)*md).toFixed(1)+'px,'+(y+Math.sin(n.ma)*md*.5).toFixed(1)+'px,0)';
+        n.moonEl.style.zIndex=String(100+Math.round(si*40)+(Math.sin(n.ma)>0?1:-1));
+      }
+    }
+  }
+
+  let last=0;
+  function tick(now){
+    if(!running) return;
+    requestAnimationFrame(tick);
+    if(document.hidden||!visible){last=now;return;}
+    const dt=Math.min((now-last)/1000,.05); last=now;
+    if(paused) return;
+    step(dt);
+  }
+  function start(){if(!running){running=true;last=performance.now();requestAnimationFrame(tick);}}
+  new IntersectionObserver(es=>{visible=es[0].isIntersecting;},{threshold:0}).observe(panel);
+  addEventListener('resize',measure,{passive:true});
+  return {measure,start,step,nodes,
+    node:id=>nodes.find(n=>n.p.id===id),
+    setPaused(v){paused=v;},
+    center(){return{cx,cy,W,H,scale};}};
+})();
+
+/* ==========================================================================
+   ZOOM + VARREDURA
+   ========================================================================== */
+const Zoom=(function(){
+  const panel=document.getElementById('panel');
+  const sphere=document.getElementById('zsphere');
+  const scan=document.getElementById('scanSvg');
+  const body=document.getElementById('zbody');
+  const sw=document.getElementById('switcher');
+  let current=null,timers=[];
+  const ZD=460;                                  /* diâmetro base, nítido */
+
+  PROJECTS.forEach(p=>{
+    const b=document.createElement('button');
+    b.type='button'; b.dataset.id=p.id; b.style.setProperty('--sc',p.c[0]);
+    b.innerHTML='<span class="sw"></span>'+p.name;
+    b.addEventListener('click',()=>enter(p.id));
+    sw.appendChild(b);
+  });
+
+  /* reticulado de varredura */
+  /* pontos da varredura — cada quadrado marca algo que o robô confere */
+  const NODES=[[104,132],[252,102],[150,262],[286,296]];
+  function buildScan(p){
+    const m=24,S=400;
+    let g='<g class="brk">'+
+      ['M'+m+' '+(m+44)+'V'+m+'H'+(m+44),
+       'M'+(S-m-44)+' '+m+'H'+(S-m)+'V'+(m+44),
+       'M'+(S-m)+' '+(S-m-44)+'V'+(S-m)+'H'+(S-m-44),
+       'M'+(m+44)+' '+(S-m)+'H'+m+'V'+(S-m-44)]
+      .map(d=>'<path d="'+d+'"/>').join('')+'</g>';
+    g+='<line class="sweep" x1="0" y1="0" x2="400" y2="0"/>';
+    NODES.forEach((n,i)=>{
+      const tag=(p.scan||[])[i]; if(!tag) return;
+      g+='<g class="node" style="animation-delay:'+(i*140+120)+'ms">'+
+         '<rect x="'+(n[0]-15)+'" y="'+(n[1]-15)+'" width="30" height="30" rx="3"/>'+
+         '<line x1="'+(n[0]+15)+'" y1="'+n[1]+'" x2="'+(n[0]+44)+'" y2="'+n[1]+'"/>'+
+         '<text x="'+(n[0]+50)+'" y="'+(n[1]+4)+'">'+tag+'</text></g>';
+    });
+    scan.innerHTML=g;
+  }
+
+  function render(p){
+    body.innerHTML=
+      '<span class="zpill'+(p.wip?' wip':'')+'"><span class="bt"></span>'+p.status+'</span>'+
+      '<h4>'+p.name+'</h4>'+
+      '<p class="kick">'+p.kick+'</p>'+
+      '<p class="desc">'+p.desc+'</p>'+
+      '<div class="zkpis">'+p.kpis.map(k=>'<div class="k"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>').join('')+'</div>'+
+      '<button class="zback" type="button">← Voltar ao sistema</button>';
+    body.querySelector('.zback').addEventListener('click',leave);
+  }
+
+  function enter(id){
+    const p=PROJECTS.find(x=>x.id===id); if(!p) return;
+    timers.forEach(clearTimeout); timers=[];
+    const prev=current; current=id;
+    const n=Solar.node(id), c=Solar.center();
+
+    panelStars.warp();                            /* estrelas esticam */
+    panel.classList.remove('scanning','scanned');
+
+    [sphere,scan].forEach(el=>{
+      el.style.setProperty('--zd',ZD+'px');
+      el.style.setProperty('--c1',p.c[0]);
+      el.style.setProperty('--c2',p.c[1]);
+      el.style.setProperty('--c3',p.c[2]);
+    });
+
+    /* parte do lugar exato do planeta, no tamanho exato dele */
+    if(!prev){
+      const d=n.p.r*2*c.scale;
+      [sphere,scan].forEach(el=>{
+        el.style.transition='none';
+        el.style.setProperty('--zx',n.x+'px');
+        el.style.setProperty('--zy',n.y+'px');
+        el.style.setProperty('--zs',(d/ZD).toFixed(4));
+      });
+      void sphere.offsetWidth;
+    }
+    n.zoomed=true; n.el.style.opacity='0';
+    if(prev&&prev!==id){const q=Solar.node(prev);q.zoomed=false;q.el.style.opacity='';}
+
+    panel.classList.add('zoom');
+    Solar.setPaused(false);
+
+    /* alvo: grande, à esquerda, mordendo a borda como um planeta próximo */
+    const narrow=c.W<980;
+    /* no celular o texto ocupa a metade de baixo: a esfera sobe e encolhe */
+    const targetD=narrow?Math.min(c.W*.70,c.H*.28):Math.min(c.W*.62,c.H*.92);
+    requestAnimationFrame(()=>{
+      [sphere,scan].forEach(el=>{
+        el.style.transition='';
+        el.style.setProperty('--zx',(narrow?c.W*.46:c.W*.30)+'px');
+        el.style.setProperty('--zy',(narrow?c.H*.19:c.H*.52)+'px');
+        el.style.setProperty('--zs',(targetD/ZD).toFixed(4));
+      });
+    });
+
+    buildScan(p); render(p);
+    [...sw.children].forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+    timers.push(setTimeout(()=>panel.classList.add('scanning'),RED?0:700));
+    timers.push(setTimeout(()=>panel.classList.add('scanned'),RED?0:1900));
+  }
+
+  function leave(){
+    if(!current) return;
+    const n=Solar.node(current), c=Solar.center();
+    timers.forEach(clearTimeout); timers=[];
+    panel.classList.remove('zoom','scanning','scanned');
+    const d=n.p.r*2*c.scale;
+    [sphere,scan].forEach(el=>{
+      el.style.setProperty('--zx',n.x+'px');
+      el.style.setProperty('--zy',n.y+'px');
+      el.style.setProperty('--zs',(d/ZD).toFixed(4));
+    });
+    setTimeout(()=>{n.zoomed=false;n.el.style.opacity='';},420);
+    [...sw.children].forEach(b=>b.classList.remove('on'));
+    current=null;
+  }
+  addEventListener('keydown',e=>{if(e.key==='Escape')leave();});
+  return {enter,leave};
+})();
+
+/* ==========================================================================
+   CONTADORES + GRÁFICOS
+   ========================================================================== */
+(function(){
+  const fmt=n=>n.toLocaleString('pt-BR');
+  const io=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return; io.unobserve(e.target);
+    const el=e.target,end=+el.dataset.count;
+    if(RED){el.textContent=fmt(end);return;}
+    const dur=1500,t0=performance.now();
+    (function s(now){const k=Math.min((now-t0)/dur,1);
+      el.textContent=fmt(Math.round(end*(1-Math.pow(1-k,3))));
+      if(k<1) requestAnimationFrame(s);})(t0);
+  }),{threshold:.4});
+  document.querySelectorAll('[data-count]').forEach(el=>io.observe(el));
+
+  /* barras 20h → 2h30 */
+  const hm=document.getElementById('heroMetric');
+  const io2=new IntersectionObserver(es=>{
+    if(!es[0].isIntersecting) return; io2.disconnect();
+    hm.querySelectorAll('.col').forEach((c,i)=>
+      setTimeout(()=>c.style.setProperty('--h',c.dataset.h),RED?0:i*180+120));
+  },{threshold:.35});
+  io2.observe(hm);
+
+  /* malha de documentos */
+  const dots=document.getElementById('dotsViz');
+  for(let i=0;i<60;i++) dots.appendChild(document.createElement('i'));
+  /* 6 blocos × 10 traços = 60 regras */
+  const states=document.getElementById('statesViz');
+  for(let b=0;b<6;b++){
+    const d=document.createElement('div'); d.className='st-b';
+    for(let u=0;u<10;u++) d.appendChild(document.createElement('u')); /* 6 blocos × 10 = 60 regras */
+    states.appendChild(d);
+  }
+  /* 5 relatórios */
+  const sheets=document.getElementById('sheetsViz');
+  [100,86,72,58,44].forEach(w=>{const i=document.createElement('i');i.style.setProperty('--w',w+'%');sheets.appendChild(i);});
+
+  function fill(list,delay){
+    list.forEach((el,i)=>setTimeout(()=>el.classList.add('on'),RED?0:i*delay));
+  }
+  const io3=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return; io3.unobserve(e.target);
+    const t=e.target;
+    if(t===dots) fill([...dots.children],18);
+    if(t===states) fill([...states.querySelectorAll('u')],36);
+    if(t===sheets) fill([...sheets.children],110);
+  }),{threshold:.3});
+  [dots,states,sheets].forEach(el=>io3.observe(el));
+})();
+
+/* ==========================================================================
+   LISTA DE PROJETOS EXPANSÍVEL
+   ========================================================================== */
+(function(){
+  const list=document.getElementById('projList');
+  PROJECTS.forEach(p=>{
+    const row=document.createElement('div'); row.className='pj';
+    row.style.setProperty('--pc',p.c[0]);   /* tom claro: visível nos dois temas */
+    row.innerHTML=
+      '<button type="button" aria-expanded="false">'+
+        '<span class="pdot"></span><span class="pname">'+p.name+'</span>'+
+        '<span class="pstat">'+p.status+'</span><span class="pchev"></span></button>'+
+      '<div class="pbodyx"><div class="pinner"><div class="pmetrics">'+
+        p.metrics.map(m=>'<div class="pm"><b>'+m[0]+'</b><span>'+m[1]+'</span></div>').join('')+
+      '</div></div></div>';
+    const btn=row.querySelector('button');
+    btn.addEventListener('click',()=>{
+      const open=row.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
+    });
+    list.appendChild(row);
+  });
+})();
+
+/* ==========================================================================
+   ASTRONAUTA — corda folgada
+   ========================================================================== */
+const Diver=(function(){
+  const scene=document.getElementById('hzScene');
+  const el=document.getElementById('diver');
+  const rope=document.getElementById('ropePath');
+  let tx=0,ty=0,x=0,y=0,run=false,base={x:0,y:0},anchor={x:0,y:0};
+  function place(){
+    const r=scene.getBoundingClientRect();
+    if(!r.width) return;
+    const narrow=r.width<980;
+    anchor.x=r.width*(narrow?.9:.86); anchor.y=-40;
+    base.x=r.width*(narrow?.58:.66);
+    base.y=r.height*(narrow?.3:.26);
+    el.style.left=base.x+'px'; el.style.top=base.y+'px';
+  }
+  function draw(){
+    const w=el.getBoundingClientRect().width||100;
+    const hx=base.x+x+w*.30, hy=base.y+y+w*.50;
+    /* folga generosa: o ponto de controle cai bem abaixo da reta */
+    const mx=(anchor.x+hx)/2+x*.35;
+    const my=(anchor.y+hy)/2+Math.abs(anchor.x-hx)*.55+90+y*.3;
+    rope.setAttribute('d','M '+anchor.x+' '+anchor.y+' Q '+mx+' '+my+' '+hx+' '+hy);
+  }
+  function loop(){
+    x+=(tx-x)*.05; y+=(ty-y)*.05;
+    el.style.setProperty('--dx',x.toFixed(2)+'px');
+    el.style.setProperty('--dy',y.toFixed(2)+'px');
+    draw();
+    if(Math.abs(tx-x)>.15||Math.abs(ty-y)>.15) requestAnimationFrame(loop);
+    else run=false;
+  }
+  function kick(){if(!run){run=true;requestAnimationFrame(loop);}}
+  const sec=document.getElementById('horizonte');
+  sec.addEventListener('pointermove',e=>{
+    const r=sec.getBoundingClientRect();
+    tx=((e.clientX-r.left)/r.width-.5)*-58;
+    ty=((e.clientY-r.top)/r.height-.5)*-40;
+    kick();
+  },{passive:true});
+  sec.addEventListener('pointerleave',()=>{tx=0;ty=0;kick();});
+  addEventListener('resize',()=>{place();draw();},{passive:true});
+  return {init(){place();draw();}};
+})();
+
+/* ==========================================================================
+   LANÇAMENTO
+   ========================================================================== */
+(function(){
+  const launch=document.getElementById('launch');
+  const go=document.getElementById('goBtn'),skip=document.getElementById('skipBtn');
+  let done=false;
+  function reveal(instant){
+    if(done) return; done=true;
+    document.body.classList.remove('locked');
+    Solar.measure(); Solar.start(); Diver.init();
+    Reveal.watch(document.querySelector('main'));
+    const hero=document.querySelector('.hero');
+    if(instant){
+      launch.classList.add('gone'); launch.style.display='none';
+      Reveal.show(hero,80);
+      return;
+    }
+    launch.classList.add('go');
+    setTimeout(()=>{launch.classList.add('gone');Reveal.show(hero,180);},900);
+    setTimeout(()=>{launch.style.display='none';},2200);
+  }
+  go.addEventListener('click',()=>reveal(false));
+  skip.addEventListener('click',()=>reveal(true));
+  Solar.measure();
+})();
+</script>
+</body>
+</html>
