@@ -6,23 +6,30 @@
 <title>Hinove · Automação Fiscal</title>
 <style>
 /* ==========================================================================
-   HINOVE — Vitrine de Automação · v4
+   HINOVE — Vitrine de Automação · v3
    Paleta: azul #8FAFCB · navy #343F73 · verde #2A9165
-   Só o painel do sistema solar e o horizonte são sempre escuros.
+   Só o painel do sistema solar é sempre escuro. O resto segue o tema.
    ========================================================================== */
 :root{
-  --blue:#8FAFCB; --blue-d:#5E86AC; --navy:#343F73;
-  --green:#2A9165; --green-l:#3FBE85;
-  --purple:#7A56B0; --purple-l:#A585D6;
-  --rust:#9A3F42; --rust-l:#B85055;
+  --blue:#8FAFCB;
+  --blue-d:#5E86AC;
+  --navy:#343F73;
+  --green:#2A9165;
+  --green-l:#3FBE85;
 
-  --space:#080C17; --space-2:#0D1424;
-  --sink:#EDF2F9; --sink-2:#A6B3C9; --sink-3:#71809B;
-  --sline:rgba(143,175,203,.20); --sline-2:rgba(143,175,203,.38);
+  /* painel espacial — constante nos dois temas */
+  --space:#080C17;
+  --space-2:#0D1424;
+  --sink:#EDF2F9;
+  --sink-2:#A6B3C9;
+  --sink-3:#71809B;
+  --sline:rgba(143,175,203,.20);
+  --sline-2:rgba(143,175,203,.38);
 
   --f-display:"Inter","Segoe UI Variable Display","Segoe UI",Helvetica,Arial,sans-serif;
   --f-serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
   --f-mono:ui-monospace,"Cascadia Mono","Segoe UI Mono",Consolas,monospace;
+
   --ease:cubic-bezier(.22,.8,.24,1);
   --ease-io:cubic-bezier(.62,.03,.2,1);
   --r-lg:26px;
@@ -33,90 +40,82 @@ html[data-theme="dark"]{
   --line:rgba(143,175,203,.17); --line-2:rgba(143,175,203,.32);
   --accent-ink:#8FAFCB;
 }
+/* claro: nada de preto — o texto é o azul-escuro da marca */
 html[data-theme="light"]{
   --bg:#F4F6FA; --bg-2:#FFFFFF; --panel:#FFFFFF;
   --ink:#2B3563; --ink-2:#5A6690; --ink-3:#8B96B4;
   --line:rgba(52,63,115,.16); --line-2:rgba(52,63,115,.3);
   --accent-ink:#343F73;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:var(--f-display);
+body{
+  background:var(--bg);color:var(--ink);font-family:var(--f-display);
   -webkit-font-smoothing:antialiased;overflow-x:hidden;
-  transition:background .5s var(--ease),color .5s var(--ease)}
+  transition:background .5s var(--ease),color .5s var(--ease);
+}
 body.locked{overflow:hidden}
 ::selection{background:var(--green);color:#fff}
 .wrap{width:min(1240px,92vw);margin-inline:auto}
 h1,h2,h3{letter-spacing:-.045em;line-height:1.02;font-weight:800}
 .serif{font-family:var(--f-serif);font-style:italic;font-weight:400;letter-spacing:-.02em}
+
+/* rótulos mono — legíveis, nunca abaixo de ~11px */
 .lab{font-family:var(--f-mono);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;line-height:1.6}
 .lab-s{font-family:var(--f-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;line-height:1.6}
 
-/* ---- entradas: voando pelos lados ---- */
-[data-fly]{opacity:0;transition:opacity 1.15s var(--ease),transform 1.35s var(--ease)}
-[data-fly="l"]{transform:translateX(-70px)}
-[data-fly="r"]{transform:translateX(70px)}
-[data-fly="u"]{transform:translateY(30px)}
-[data-fly].in{opacity:1;transform:none}
+/* ---- motion: elementos populando a tela ---- */
+[data-r]{opacity:0;transform:translateY(18px);
+  transition:opacity .85s var(--ease),transform .95s var(--ease)}
+[data-r].in{opacity:1;transform:none}
 
 /* ==========================================================================
    LANÇAMENTO
    ========================================================================== */
-#launch{position:fixed;inset:0;z-index:200;background:var(--space);
+#launch{
+  position:fixed;inset:0;z-index:200;background:var(--space);
   display:grid;place-items:center;overflow:hidden;
-  transition:opacity .8s var(--ease),visibility .8s}
+  transition:opacity .85s var(--ease),visibility .85s;
+}
 #launch.gone{opacity:0;visibility:hidden}
 #launch canvas{position:absolute;inset:0;width:100%;height:100%}
-/* gap e escala seguem a altura da janela: em telas baixas tudo encolhe
-   junto em vez de transbordar */
-.launch-in{position:relative;z-index:2;text-align:center;display:grid;justify-items:center;
-  gap:clamp(.7rem,2.2vh,1.5rem);padding:clamp(1rem,3vh,2rem);max-width:min(52rem,92vw)}
+.launch-in{position:relative;z-index:2;text-align:center;display:grid;justify-items:center;gap:1.4rem;padding:2rem}
 .launch-in .brandline{color:var(--sink-3)}
-
-/* emblema: anel + círculos da marca em volta da nave */
-.ship-hold{position:relative;display:grid;place-items:center;
-  transition:transform 1.5s var(--ease-io)}
-#launch.boost .ship-hold{transform:translateY(16px) scale(.97);transition:transform .42s var(--ease)}
-#launch.go .ship-hold{transform:translateY(-128vh) scale(.62);transition:transform 1.5s var(--ease-io)}
-.emblem{position:absolute;width:clamp(180px,34vh,310px);aspect-ratio:1;pointer-events:none}
-.emblem .ring-dash{fill:none;stroke:var(--sline-2);stroke-width:1.2;stroke-dasharray:5 9;
-  transform-origin:50% 50%;animation:spin 34s linear infinite}
-.emblem .ring-thin{fill:none;stroke:rgba(143,175,203,.3);stroke-width:1}
-@keyframes spin{to{transform:rotate(360deg)}}
-.emblem .lc{mix-blend-mode:screen;opacity:.5}
-#launch.go .emblem{opacity:0;transition:opacity .5s var(--ease)}
-.ship{position:relative;width:clamp(96px,17vh,158px);display:block;
-  animation:hover-idle 4.4s ease-in-out infinite}
-#launch.boost .ship,#launch.go .ship{animation:shake .18s linear infinite}
-@keyframes hover-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.ship-hold{position:relative;transition:transform 1.6s var(--ease-io)}
+#launch.go .ship-hold{transform:translateY(-125vh) scale(.66)}
+.ship{width:clamp(148px,19vw,196px);display:block;animation:hover-idle 4.2s ease-in-out infinite}
+#launch.go .ship{animation:shake .2s linear infinite}
+@keyframes hover-idle{0%,100%{transform:translateY(0)}50%{transform:translateY(-11px)}}
 @keyframes shake{0%,100%{transform:translateX(-1.6px)}50%{transform:translateX(1.6px)}}
-.flame{opacity:0;transform-origin:110px 236px;transition:opacity .25s}
-#launch.boost .flame,#launch.go .flame{opacity:1;animation:burn .13s linear infinite}
-@keyframes burn{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.6) scaleX(.84)}}
-.trail{position:absolute;left:50%;top:56%;width:4px;height:0;transform:translateX(-50%);
-  background:linear-gradient(180deg,rgba(255,246,224,.95),rgba(143,175,203,0));
-  border-radius:99px;transition:height 1.5s var(--ease-io)}
-#launch.go .trail{height:140vh}
-
-.launch-in h1{font-size:clamp(1.7rem,4.6vh,3.2rem);color:var(--sink);text-transform:uppercase;line-height:1.06}
+.flame{transform-origin:110px 250px;opacity:0;transition:opacity .28s}
+#launch.go .flame{opacity:1;animation:burn .15s linear infinite}
+@keyframes burn{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.55) scaleX(.85)}}
+.trail{position:absolute;left:50%;top:60%;width:3px;height:0;transform:translateX(-50%);
+  background:linear-gradient(180deg,rgba(255,245,220,.9),rgba(246,197,106,0));
+  border-radius:99px;transition:height 1.6s var(--ease-io)}
+#launch.go .trail{height:135vh}
+.launch-in h1{font-size:clamp(2rem,5.4vw,3.5rem);color:var(--sink);text-transform:uppercase}
 .launch-in h1 .serif{text-transform:none;color:var(--blue)}
-.saying{font-family:var(--f-serif);font-style:italic;font-size:clamp(.95rem,2.1vh,1.32rem);
-  line-height:1.5;color:var(--sink-2);max-width:30ch}
-.saying b{font-style:normal;font-weight:700;color:var(--green-l)}
-.go-btn{margin-top:.2rem;cursor:pointer;border:1px solid var(--sline-2);background:transparent;
-  color:var(--sink);font-family:var(--f-mono);font-size:.78rem;letter-spacing:.2em;
-  text-transform:uppercase;padding:clamp(.7rem,1.7vh,1rem) 2.4rem;border-radius:99px;position:relative;
-  isolation:isolate;overflow:hidden;transition:color .3s,border-color .3s,transform .3s var(--ease)}
+.launch-in p{color:var(--sink-2);max-width:42ch;line-height:1.65;font-size:1.02rem}
+.go-btn{
+  margin-top:.3rem;cursor:pointer;border:1px solid var(--sline-2);background:transparent;color:var(--sink);
+  font-family:var(--f-mono);font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;
+  padding:1rem 2.3rem;border-radius:99px;position:relative;isolation:isolate;overflow:hidden;
+  transition:color .3s,border-color .3s,transform .3s var(--ease)}
 .go-btn::before{content:"";position:absolute;inset:0;z-index:-1;
   background:linear-gradient(96deg,var(--blue),var(--green));
   transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ease)}
 .go-btn:hover{border-color:transparent;color:#08121C;transform:translateY(-2px)}
 .go-btn:hover::before{transform:scaleX(1)}
-#launch.boost .launch-in>:not(.ship-hold),#launch.go .launch-in>:not(.ship-hold){
-  opacity:0;transition:opacity .5s var(--ease)}
+.skip{background:none;border:0;cursor:pointer;color:var(--sink-3);
+  font-family:var(--f-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  padding:.5rem;transition:color .25s}
+.skip:hover{color:var(--sink-2)}
+#launch.go .launch-in>:not(.ship-hold){opacity:0;transition:opacity .4s var(--ease)}
 
 /* ==========================================================================
-   NAV + HERÓI
+   NAV
    ========================================================================== */
 header.nav{position:sticky;top:0;z-index:60;background:var(--bg);
   border-bottom:1px solid var(--line);transition:background .5s var(--ease),border-color .5s var(--ease)}
@@ -132,77 +131,59 @@ html[data-theme="dark"] .logo .wm span{color:var(--green-l)}
 .nav-links a{font-family:var(--f-mono);font-size:.74rem;letter-spacing:.14em;text-transform:uppercase;
   color:var(--ink-2);text-decoration:none;transition:color .25s}
 .nav-links a:hover{color:var(--ink)}
-.toggle{width:52px;height:28px;border-radius:99px;border:1px solid var(--line-2);
-  background:var(--panel);cursor:pointer;position:relative;flex:none}
+.toggle{width:52px;height:28px;border-radius:99px;border:1px solid var(--line-2);background:var(--panel);
+  cursor:pointer;position:relative;flex:none}
 .toggle::after{content:"";position:absolute;top:2px;left:2px;width:22px;height:22px;border-radius:50%;
-  background:linear-gradient(150deg,var(--blue),var(--navy));
-  transition:transform .45s var(--ease),background .45s}
-html[data-theme="light"] .toggle::after{transform:translateX(24px);
-  background:linear-gradient(150deg,#FFD9A0,var(--green))}
+  background:linear-gradient(150deg,var(--blue),var(--navy));transition:transform .45s var(--ease),background .45s}
+html[data-theme="light"] .toggle::after{transform:translateX(24px);background:linear-gradient(150deg,#FFD9A0,var(--green))}
 
-.hero{padding:clamp(3.4rem,11vh,7rem) 0 clamp(2.6rem,7vh,5rem)}
+/* ==========================================================================
+   HERO
+   ========================================================================== */
+.hero{padding:clamp(3.4rem,11vh,7.5rem) 0 clamp(2.6rem,7vh,5rem)}
 .hero-grid{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center}
-.hero h1{font-size:clamp(2.7rem,9.4vw,8.4rem);line-height:.9;text-transform:uppercase;letter-spacing:-.055em}
+.hero h1{font-size:clamp(3rem,11vw,10rem);line-height:.84;text-transform:uppercase;letter-spacing:-.055em}
 .hero h1 span{display:block}
-.hero h1 .serif{text-transform:none;line-height:1.06;
+.hero h1 .serif{
+  text-transform:none;
   background:linear-gradient(96deg,var(--blue-d),var(--green) 55%,var(--navy));
   -webkit-background-clip:text;background-clip:text;color:transparent}
 html[data-theme="dark"] .hero h1 .serif{
   background:linear-gradient(96deg,#B6CDE2,var(--green-l) 52%,#8595DC);
   -webkit-background-clip:text;background-clip:text;color:transparent}
-.hero .sub{max-width:47ch;margin-top:2rem;font-size:clamp(1.02rem,1.35vw,1.18rem);
-  line-height:1.65;color:var(--ink-2)}
+.hero .sub{max-width:47ch;margin-top:2rem;font-size:clamp(1.02rem,1.35vw,1.18rem);line-height:1.65;color:var(--ink-2)}
 .hero .sub b{color:var(--ink);font-weight:600}
 .hero-eyebrow{display:flex;align-items:center;gap:.8rem;margin-bottom:1.9rem;color:var(--ink-3)}
 .hero-eyebrow .dot{width:8px;height:8px;border-radius:50%;background:var(--green);
   box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 22%,transparent)}
-.astro-hero{width:clamp(200px,24vw,320px);animation:float 9s ease-in-out infinite;
-  filter:drop-shadow(0 30px 60px rgba(20,30,60,.3))}
-@keyframes float{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-24px) rotate(4deg)}}
+.astro-hero{width:clamp(190px,23vw,310px);animation:float 9s ease-in-out infinite;
+  filter:drop-shadow(0 30px 60px rgba(20,30,60,.28))}
+@keyframes float{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-22px) rotate(3deg)}}
 
 /* ==========================================================================
-   IMPULSO — terminal sutil, motion em loop
+   IMPULSO — números com gráficos
    ========================================================================== */
 section{scroll-margin-top:70px}
 .sec{padding:clamp(3rem,8vh,5.5rem) 0}
-.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:1.4rem}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:2.2rem}
 .sec-head h2{font-size:clamp(1.9rem,3.8vw,2.9rem);max-width:20ch;line-height:1.08}
 .sec-head .note{color:var(--ink-3);white-space:nowrap}
 
-/* barra de terminal */
-.term-bar{display:flex;align-items:center;gap:.8rem;padding:.6rem 1rem;margin-bottom:1.1rem;
-  border:1px solid var(--line);border-radius:12px;background:var(--panel);
-  font-family:var(--f-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
-.term-bar .led{width:8px;height:8px;border-radius:50%;background:var(--green-l);flex:none;
-  box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 22%,transparent);animation:led 2.4s ease-in-out infinite}
-@keyframes led{0%,100%{opacity:1}50%{opacity:.32}}
-.term-bar .grow{flex:1;height:1px;background:repeating-linear-gradient(90deg,
-  var(--line-2) 0 6px,transparent 6px 12px)}
-.term-bar .cursor{width:8px;height:14px;background:var(--green-l);animation:blink 1.1s steps(1) infinite}
-@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
-
-.hero-metric{position:relative;border:1px solid var(--line);border-radius:var(--r-lg);
-  padding:clamp(1.6rem,3.2vw,2.6rem);background:var(--panel);overflow:hidden;
-  display:grid;grid-template-columns:1fr auto;gap:clamp(1.6rem,4vw,3.4rem);
+.hero-metric{
+  border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(1.6rem,3.2vw,2.6rem);
+  background:var(--panel);display:grid;grid-template-columns:1fr auto;gap:clamp(1.6rem,4vw,3.4rem);
   align-items:center;margin-bottom:1.1rem}
-/* varredura de terminal, em loop */
-.scanline{position:absolute;left:0;right:0;height:120px;pointer-events:none;
-  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--green) 9%,transparent),transparent);
-  animation:scanmove 6.5s linear infinite}
-@keyframes scanmove{0%{transform:translateY(-140px)}100%{transform:translateY(560px)}}
 .hm-label{font-size:clamp(1.18rem,1.9vw,1.5rem);line-height:1.4;font-weight:600;max-width:24ch;color:var(--ink)}
 .hm-label small{display:block;margin-top:.8rem;color:var(--ink-2);font-weight:400;
   font-family:var(--f-mono);font-size:.76rem;letter-spacing:.13em;text-transform:uppercase;line-height:1.6}
-.hm-right{display:flex;align-items:flex-end;gap:clamp(1rem,2.6vw,2.4rem);flex-wrap:wrap;position:relative}
+.hm-right{display:flex;align-items:flex-end;gap:clamp(1rem,2.6vw,2.4rem);flex-wrap:wrap}
+/* gráfico de barras antes/depois */
 .bars{display:flex;align-items:flex-end;gap:1.1rem;height:clamp(120px,17vw,175px)}
 .bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:.55rem}
-.bar .col{width:clamp(46px,6vw,74px);border-radius:10px 10px 4px 4px;position:relative;overflow:hidden}
-.bar.from .col{height:100%;background:linear-gradient(180deg,var(--ink-3),color-mix(in srgb,var(--ink-3) 45%,transparent));
-  animation:barA 7s var(--ease-io) infinite}
-.bar.to .col{height:12.5%;background:linear-gradient(180deg,var(--green-l),var(--green));
-  animation:barB 7s var(--ease-io) infinite}
-@keyframes barA{0%,8%{height:0}26%,72%{height:100%}92%,100%{height:0}}
-@keyframes barB{0%,14%{height:0}34%,72%{height:12.5%}92%,100%{height:0}}
+.bar .col{width:clamp(46px,6vw,74px);border-radius:10px 10px 4px 4px;position:relative;
+  height:var(--h);transition:height 1.3s var(--ease-io)}
+.bar.from .col{background:linear-gradient(180deg,var(--ink-3),color-mix(in srgb,var(--ink-3) 45%,transparent))}
+.bar.to .col{background:linear-gradient(180deg,var(--green-l),var(--green))}
 .bar .v{font-size:clamp(1.3rem,2.3vw,1.9rem);font-weight:800;letter-spacing:-.04em;color:var(--ink)}
 .bar.from .v{color:var(--ink-3)}
 .bar .t{color:var(--ink-3);font-family:var(--f-mono);font-size:.66rem;letter-spacing:.14em;text-transform:uppercase}
@@ -215,40 +196,42 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
   text-transform:uppercase;max-width:16ch;line-height:1.6}
 
 .m-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
-.m-card{position:relative;border:1px solid var(--line);border-radius:var(--r-lg);
-  padding:clamp(1.4rem,2.4vw,1.9rem);background:var(--panel);overflow:hidden;
-  display:flex;flex-direction:column;gap:.7rem;transition:border-color .3s,transform .35s var(--ease)}
+.m-card{border:1px solid var(--line);border-radius:var(--r-lg);padding:clamp(1.4rem,2.4vw,1.9rem);
+  background:var(--panel);display:flex;flex-direction:column;gap:.7rem;
+  transition:border-color .3s,transform .35s var(--ease)}
 .m-card:hover{border-color:var(--line-2);transform:translateY(-4px)}
 .m-card .big{font-size:clamp(2.9rem,5.6vw,4.2rem);font-weight:800;letter-spacing:-.05em;line-height:.9;color:var(--ink)}
 .m-card .big .pre{font-size:.48em;color:var(--acc);margin-right:.04em}
 .m-card .lead{font-size:clamp(1.05rem,1.4vw,1.18rem);line-height:1.35;font-weight:600;color:var(--ink)}
 .m-card .sub{color:var(--ink-2);font-size:.92rem;line-height:1.55}
+/* margin-top:auto alinha os três gráficos na mesma base, mesmo com textos
+   de alturas diferentes; a altura mínima iguala o peso visual entre eles */
 .m-viz{margin-top:auto;padding-top:1.1rem;border-top:1px solid var(--line);
   min-height:88px;display:flex;flex-direction:column;justify-content:center}
-.m-tick{position:absolute;top:1rem;right:1.1rem;font-family:var(--f-mono);font-size:.58rem;
-  letter-spacing:.16em;text-transform:uppercase;color:var(--acc);opacity:.75}
 
-/* viz em loop */
+/* viz 1 — malha de documentos */
 .dots{display:grid;grid-template-columns:repeat(20,1fr);gap:4px}
 .dots i{display:block;aspect-ratio:1;border-radius:2px;background:var(--line-2);
-  animation:dotp 4.4s ease-in-out infinite}
-@keyframes dotp{0%,6%{background:var(--line-2)}18%,64%{background:var(--acc)}82%,100%{background:var(--line-2)}}
+  transition:background .4s var(--ease),transform .4s var(--ease)}
+.dots i.on{background:var(--acc)}
+/* viz 2 — 6 blocos de 10 traços */
 .states{display:flex;gap:9px}
 .st-b{flex:1;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;padding:7px 6px;
   border:1px solid var(--line);border-radius:8px}
 .st-b u{display:block;height:3px;border-radius:2px;background:var(--line-2);text-decoration:none;
-  animation:dotp 4.8s ease-in-out infinite}
+  transition:background .5s var(--ease)}
+.st-b u.on{background:var(--acc)}
+/* viz 3 — folhas de relatório */
 .sheets{display:flex;flex-direction:column;gap:7px}
-.sheets i{display:block;height:9px;border-radius:4px;background:var(--acc);
-  width:var(--w);transform-origin:left;animation:sheet 5.2s var(--ease-io) infinite}
-@keyframes sheet{0%,5%{transform:scaleX(0);opacity:.3}22%,70%{transform:scaleX(1);opacity:1}
-  88%,100%{transform:scaleX(0);opacity:.3}}
-</style>
-<style>
+.sheets i{display:block;height:9px;border-radius:4px;background:var(--acc);opacity:.28;
+  width:var(--w);transition:opacity .5s var(--ease),width .9s var(--ease-io)}
+.sheets i.on{opacity:1}
+
 /* ==========================================================================
    SISTEMAS — painel escuro contido
    ========================================================================== */
-.panel-space{position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--space);
+.panel-space{
+  position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--space);
   height:clamp(540px,74vh,680px);border:1px solid rgba(143,175,203,.16);
   box-shadow:0 30px 80px rgba(8,14,30,.28)}
 .panel-space canvas{position:absolute;inset:0;width:100%;height:100%;z-index:0}
@@ -261,9 +244,10 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
 .ps-copy h3 .serif{color:var(--blue)}
 .ps-copy p{margin-top:.9rem;color:var(--sink-2);line-height:1.6;font-size:.98rem;max-width:34ch}
 .ps-hint{position:absolute;left:50%;bottom:1.3rem;transform:translateX(-50%);z-index:6;
-  color:var(--sink-3);font-family:var(--f-mono);font-size:.68rem;letter-spacing:.18em;
-  text-transform:uppercase;pointer-events:none;transition:opacity .4s;white-space:nowrap}
+  color:var(--sink-3);font-family:var(--f-mono);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  pointer-events:none;transition:opacity .4s;white-space:nowrap}
 .panel-space.zoom .ps-hint{opacity:0}
+
 .system{position:absolute;inset:0;z-index:3;transition:opacity .6s var(--ease)}
 .panel-space.zoom .system{opacity:0;pointer-events:none}
 .orbits{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -282,6 +266,7 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
 .sun-label{position:absolute;left:50%;top:calc(50% + var(--d)*.92);transform:translateX(-50%);
   font-family:var(--f-mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
   color:rgba(226,238,250,.6);white-space:nowrap}
+
 .planet{position:absolute;left:0;top:0;width:0;height:0;border:0;background:none;padding:0;cursor:pointer}
 .pbody{position:absolute;left:50%;top:50%;width:var(--d);height:var(--d);
   margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);border-radius:50%;
@@ -308,9 +293,11 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
   margin:calc(var(--d)/-2) 0 0 calc(var(--d)/-2);border-radius:50%;
   background:radial-gradient(circle at 36% 32%,#E8EEF6,#A9B7CB 62%,#6B7B93 100%)}
 
+/* ---- zoom + varredura ---- */
 .zoomview{position:absolute;inset:0;z-index:5;opacity:0;pointer-events:none;transition:opacity .5s var(--ease)}
 .panel-space.zoom .zoomview{opacity:1;pointer-events:auto}
-.zsphere{position:absolute;left:0;top:0;width:var(--zd);height:var(--zd);
+.zsphere{
+  position:absolute;left:0;top:0;width:var(--zd);height:var(--zd);
   margin:calc(var(--zd)/-2) 0 0 calc(var(--zd)/-2);border-radius:50%;
   background:radial-gradient(circle at 34% 26%,var(--c1) 0%,var(--c2) 40%,var(--c3) 86%,#05080F 100%);
   box-shadow:inset -30px -28px 90px rgba(0,0,0,.6),0 0 90px color-mix(in srgb,var(--c1) 32%,transparent);
@@ -321,24 +308,28 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
              radial-gradient(36% 28% at 72% 64%,color-mix(in srgb,var(--c3) 68%,transparent),transparent 72%);
   filter:blur(9px);animation:swirl 46s linear infinite}
 @keyframes swirl{to{transform:rotate(360deg)}}
+
 .scan{position:absolute;left:0;top:0;width:var(--zd);height:var(--zd);
   margin:calc(var(--zd)/-2) 0 0 calc(var(--zd)/-2);
   transform:translate3d(var(--zx),var(--zy),0) scale(var(--zs));
   transition:transform 1.15s var(--ease-io);pointer-events:none;overflow:visible}
-.scan .brk{stroke:#F2F7FC;stroke-width:2.5;fill:none;opacity:0;transition:opacity .4s var(--ease)}
+.scan .brk{stroke:var(--sink);stroke-width:2.5;fill:none;opacity:0;
+  transition:opacity .4s var(--ease)}
 .panel-space.scanning .scan .brk{opacity:.9}
 .scan .sweep{stroke:var(--c1);stroke-width:2;opacity:0}
 .panel-space.scanning .scan .sweep{opacity:.85;animation:sweep 1.5s var(--ease-io) forwards}
-@keyframes sweep{0%{transform:translateY(0);opacity:0}10%{opacity:.9}90%{opacity:.9}
-  100%{transform:translateY(var(--zd));opacity:0}}
+@keyframes sweep{0%{transform:translateY(0);opacity:0}
+  10%{opacity:.9}90%{opacity:.9}100%{transform:translateY(var(--zd));opacity:0}}
 .scan .node{opacity:0}
 .panel-space.scanned .scan .node{animation:pop .5s var(--ease) forwards}
 @keyframes pop{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:scale(1)}}
+/* halo escuro: as marcas precisam ler tanto no lado claro quanto no escuro da esfera */
 .scan .node rect{fill:none;stroke:#F2F7FC;stroke-width:1.8}
 .scan .node line{stroke:rgba(242,247,252,.75);stroke-width:1.2}
-.scan .node text{fill:#F2F7FC;font-family:var(--f-mono);font-size:12px;font-weight:600;
-  letter-spacing:.1em;stroke:rgba(5,9,18,.9);stroke-width:3.5;paint-order:stroke fill}
+.scan .node text{fill:#F2F7FC;font-family:var(--f-mono);font-size:12px;font-weight:600;letter-spacing:.1em;
+  stroke:rgba(5,9,18,.9);stroke-width:3.5;paint-order:stroke fill}
 .scan .node,.scan .brk{filter:drop-shadow(0 0 3px rgba(5,9,18,.85))}
+
 .zbody{position:absolute;right:0;top:0;height:100%;width:min(52%,540px);z-index:6;
   display:flex;flex-direction:column;justify-content:center;gap:.85rem;
   padding:clamp(1.5rem,3vw,2.6rem);
@@ -349,8 +340,8 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
   border:1px solid var(--sline-2);color:var(--sink-2);align-self:flex-start;
   font-family:var(--f-mono);font-size:.66rem;letter-spacing:.15em;text-transform:uppercase}
 .zpill .bt{width:7px;height:7px;border-radius:50%;background:var(--green-l)}
-.zpill.wip .bt{background:#E8B75A;animation:blink2 1.9s ease-in-out infinite}
-@keyframes blink2{0%,100%{opacity:1}50%{opacity:.25}}
+.zpill.wip .bt{background:#E8B75A;animation:blink 1.9s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
 .zbody h4{font-size:clamp(1.9rem,3.6vw,2.7rem);font-weight:800;letter-spacing:-.05em;color:var(--sink);line-height:1}
 .zbody .kick{font-family:var(--f-serif);font-style:italic;font-size:clamp(1rem,1.5vw,1.2rem);color:var(--blue)}
 .zbody .desc{font-size:.98rem;line-height:1.65;color:var(--sink-2);max-width:42ch}
@@ -365,6 +356,7 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
   font-family:var(--f-mono);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
   padding:.45rem 0;transition:color .25s}
 .zback:hover{color:var(--sink)}
+
 .switcher{position:absolute;left:50%;top:1.1rem;transform:translateX(-50%);z-index:7;
   display:flex;gap:.3rem;padding:.34rem;border:1px solid var(--sline);border-radius:99px;
   background:rgba(9,14,26,.72);max-width:94%;overflow:auto;scrollbar-width:none;
@@ -380,126 +372,86 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
 .switcher button.on{color:var(--sink);background:rgba(143,175,203,.15)}
 
 /* ==========================================================================
-   HORIZONTE — sempre escuro
+   HORIZONTE
    ========================================================================== */
-.horizonte{--hzh:clamp(19rem,34vh,26rem);position:relative;overflow:hidden;
-  background:var(--space);color:var(--sink);
-  padding:clamp(3rem,7vh,5rem) 0 calc(var(--hzh) + 4.5rem)}
-.hz-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:clamp(2rem,5vw,4.5rem);
-  align-items:start;position:relative;z-index:3}
-.hz-grid h2{font-size:clamp(1.85rem,4vw,3rem);line-height:1.26;color:var(--sink)}
-.hz-grid h2 .serif{display:inline-block;color:var(--blue)}
-.hz-grid p{margin-top:1.4rem;color:var(--sink-2);line-height:1.75;max-width:46ch;font-size:1.02rem}
+.horizonte{--hzh:clamp(17rem,30vh,23rem);
+  position:relative;overflow:hidden;padding-bottom:calc(var(--hzh) + 5rem)}
+.hz-grid{display:grid;grid-template-columns:1.02fr 1fr;gap:clamp(2rem,5vw,4.5rem);align-items:start;
+  position:relative;z-index:3}
+/* respiro para o acento do "É" não bater no "g" da linha de cima */
+.hz-grid h2{font-size:clamp(1.85rem,4vw,3rem);line-height:1.26}
+.hz-grid h2 .serif{display:inline-block}
+.hz-grid p{margin-top:1.4rem;color:var(--ink-2);line-height:1.75;max-width:46ch;font-size:1.02rem}
 
-/* lista selecionável */
-.projlist{border-top:1px solid var(--sline)}
-.pj{border-bottom:1px solid var(--sline)}
-.pj>button{width:100%;background:none;border:0;cursor:pointer;text-align:left;color:var(--sink);
-  display:flex;align-items:center;gap:.85rem;padding:.95rem .2rem;font:inherit;transition:color .25s}
-.pj>button:hover{color:var(--blue)}
-.pj .pcheck{width:19px;height:19px;border-radius:6px;border:1.5px solid var(--sline-2);flex:none;
-  position:relative;transition:background .3s var(--ease),border-color .3s}
-.pj .pcheck::after{content:"";position:absolute;left:5.5px;top:2px;width:5px;height:10px;
-  border:solid #06120C;border-width:0 2.4px 2.4px 0;transform:rotate(45deg) scale(0);
-  transition:transform .3s var(--ease)}
-.pj.sel .pcheck{background:var(--green-l);border-color:var(--green-l)}
-.pj.sel .pcheck::after{transform:rotate(45deg) scale(1)}
-.pj .pdot{width:10px;height:10px;border-radius:50%;background:var(--pc);flex:none}
+/* lista expansível */
+.projlist{border-top:1px solid var(--line)}
+.pj{border-bottom:1px solid var(--line)}
+.pj>button{width:100%;background:none;border:0;cursor:pointer;text-align:left;color:inherit;
+  display:flex;align-items:center;gap:1rem;padding:1.05rem .2rem;font:inherit;transition:color .25s}
+.pj>button:hover{color:var(--accent-ink)}
+html[data-theme="dark"] .pj>button:hover{color:var(--blue)}
+.pj .pdot{width:11px;height:11px;border-radius:50%;background:var(--pc);flex:none}
 .pj .pname{font-weight:650;font-size:1.06rem;letter-spacing:-.015em;flex:1}
-.pj .pstat{color:var(--sink-3);font-family:var(--f-mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase}
+.pj .pstat{color:var(--ink-3);font-family:var(--f-mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase}
+.pj .pchev{width:14px;height:14px;flex:none;position:relative;transition:transform .4s var(--ease)}
+.pj .pchev::before,.pj .pchev::after{content:"";position:absolute;background:var(--ink-3);border-radius:2px}
+.pj .pchev::before{left:0;top:6px;width:14px;height:2px}
+.pj .pchev::after{left:6px;top:0;width:2px;height:14px;transition:opacity .4s var(--ease)}
+.pj.open .pchev{transform:rotate(180deg)}
+.pj.open .pchev::after{opacity:0}
 .pj .pbodyx{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s var(--ease)}
-.pj.sel .pbodyx{grid-template-rows:1fr}
+.pj.open .pbodyx{grid-template-rows:1fr}
 .pj .pinner{overflow:hidden}
-.pmetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;padding:0 .2rem 1.1rem}
-.pm{border:1px solid var(--sline);border-radius:12px;padding:.75rem .8rem;background:rgba(143,175,203,.05)}
-.pm b{display:block;font-size:1.4rem;font-weight:800;letter-spacing:-.04em;color:var(--sink);line-height:1}
-.pm span{display:block;margin-top:.38rem;color:var(--sink-3);
-  font-family:var(--f-mono);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;line-height:1.5}
+.pmetrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;padding:0 .2rem 1.15rem}
+.pm{border:1px solid var(--line);border-radius:12px;padding:.8rem .85rem;background:var(--panel)}
+.pm b{display:block;font-size:1.45rem;font-weight:800;letter-spacing:-.04em;color:var(--ink);line-height:1}
+.pm span{display:block;margin-top:.4rem;color:var(--ink-3);
+  font-family:var(--f-mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;line-height:1.5}
 
-/* barra: no que é gasto o tempo */
-.timebox{position:relative;z-index:3;margin-top:clamp(2.4rem,5vh,3.6rem)}
-.timebox h3{font-size:clamp(1.15rem,2.2vw,1.6rem);color:var(--sink);line-height:1.2}
-.timebox .tsub{margin-top:.5rem;color:var(--sink-3);font-family:var(--f-mono);font-size:.68rem;
-  letter-spacing:.13em;text-transform:uppercase}
-.tbar{display:flex;height:clamp(38px,5vw,52px);border-radius:12px;overflow:hidden;
-  margin-top:1.1rem;border:1px solid var(--sline)}
-.tseg{position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
-  transition:width 1s var(--ease-io);min-width:0}
-.tseg.g{background:linear-gradient(180deg,var(--green-l),var(--green))}
-.tseg.p{background:linear-gradient(180deg,var(--purple-l),var(--purple))}
-.tseg.r{background:linear-gradient(180deg,var(--rust-l),var(--rust))}
-.tseg b{font-family:var(--f-mono);font-size:.72rem;font-weight:700;color:#fff;letter-spacing:.06em;
-  text-shadow:0 1px 4px rgba(0,0,0,.45)}
-.tlegend{display:flex;flex-wrap:wrap;gap:1.2rem;margin-top:.9rem}
-.tlegend span{display:flex;align-items:center;gap:.5rem;color:var(--sink-2);
-  font-family:var(--f-mono);font-size:.66rem;letter-spacing:.11em;text-transform:uppercase}
-.tlegend i{width:10px;height:10px;border-radius:3px;flex:none}
-.lights{display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-top:1.5rem}
-.lt{display:flex;align-items:center;gap:.65rem;padding:.8rem .9rem;border-radius:12px;
-  border:1px solid var(--sline);background:rgba(143,175,203,.04);transition:border-color .5s,background .5s}
-.lt .bulb{width:12px;height:12px;border-radius:50%;flex:none;background:rgba(143,175,203,.22);
-  transition:background .5s var(--ease),box-shadow .5s var(--ease)}
-.lt span{font-family:var(--f-mono);font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--sink-3);line-height:1.45;transition:color .5s}
-.lt.on{border-color:color-mix(in srgb,var(--green) 45%,transparent);
-  background:color-mix(in srgb,var(--green) 10%,transparent)}
-.lt.on .bulb{background:var(--green-l);box-shadow:0 0 12px var(--green-l),0 0 0 4px color-mix(in srgb,var(--green) 22%,transparent)}
-.lt.on span{color:var(--sink)}
-
-/* faixa do planeta + sol */
+/* Horizonte: a esfera vive numa faixa no rodapé da seção e é recortada por ela,
+   então a curva cruza a tela em vez de engolir o texto. */
 .hz-horizon{position:absolute;left:0;right:0;bottom:0;height:var(--hzh);overflow:hidden;z-index:1}
-/* O sol fica FORA da faixa (que tem overflow:hidden) e abaixo dela no empilhamento.
-   Assim o planeta cobre a base do disco sem cortar o brilho — era o corte seco. */
-/* translateY 42% deixa o núcleo logo acima do limbo (≈8% da própria altura),
-   com a base escondida atrás do planeta — escala junto com o tamanho */
-.hz-sun{position:absolute;left:19%;bottom:var(--hzh);z-index:0;
-  width:clamp(200px,26vw,360px);aspect-ratio:1;transform:translate(-50%,42%);
-  border-radius:50%;pointer-events:none;
-  background:radial-gradient(circle,#FFFFFF 0%,#FFF7E2 14%,rgba(255,228,172,.5) 32%,
-    rgba(246,197,106,.2) 52%,rgba(246,197,106,.05) 72%,rgba(246,197,106,0) 86%);
-  animation:sunglow 9s ease-in-out infinite}
-@keyframes sunglow{0%,100%{opacity:.85;transform:translate(-50%,42%) scale(1)}
-  50%{opacity:1;transform:translate(-50%,42%) scale(1.06)}}
-/* brilho espalhado ao longo do limbo, para o encontro não ficar duro */
-.hz-bloom{position:absolute;left:19%;bottom:var(--hzh);z-index:0;
-  width:min(130%,1200px);height:clamp(150px,20vh,260px);
-  transform:translate(-50%,42%);pointer-events:none;
-  background:radial-gradient(ellipse 50% 50% at 50% 50%,rgba(255,238,200,.3),rgba(255,238,200,0) 70%);
-  filter:blur(16px)}
-.hz-sphere{position:absolute;left:50%;top:0;width:200%;height:520%;transform:translateX(-50%);
+.hz-sphere{
+  position:absolute;left:50%;top:0;width:200%;height:520%;transform:translateX(-50%);
   border-radius:50%;
+  /* só a faixa do topo aparece, então os stops ficam comprimidos no início —
+     um radial normal jogaria toda a cor para fora do campo visível */
   background:
     radial-gradient(ellipse 24% 3.5% at 30% .8%,rgba(255,255,255,.34),transparent 74%),
-    linear-gradient(180deg,#CFE0EE 0%,var(--blue) 2%,var(--blue-d) 6%,#3A5C84 10%,
-      var(--navy) 15%,#141A3C 21%,#070B1A 30%)}
+    linear-gradient(180deg,#CFE0EE 0%,var(--blue) 2%,var(--blue-d) 6%,#3A5C84 10%,var(--navy) 15%,#141A3C 21%,#070B1A 30%)}
 html[data-theme="dark"] .hz-sphere{
   background:
     radial-gradient(ellipse 24% 3.5% at 30% .8%,rgba(190,216,238,.3),transparent 74%),
     linear-gradient(180deg,#9CBBD5 0%,var(--blue-d) 2.5%,#365780 7%,var(--navy) 13%,#111634 19%,#05080F 28%)}
+/* fio de atmosfera no limbo */
 .hz-sphere::after{content:"";position:absolute;inset:0;border-radius:50%;
-  box-shadow:inset 0 4px 0 0 rgba(214,232,246,.9),0 -8px 40px color-mix(in srgb,var(--blue) 55%,transparent)}
-.hz-grain{position:absolute;left:36%;top:3.4%;width:13%;aspect-ratio:3.2/1;border-radius:50%;
+  box-shadow:inset 0 4px 0 0 rgba(214,232,246,.9),
+             0 -8px 40px color-mix(in srgb,var(--blue) 55%,transparent)}
+.hz-grain{position:absolute;left:24%;top:3.4%;width:13%;aspect-ratio:3.2/1;border-radius:50%;
   background:color-mix(in srgb,var(--green) 62%,transparent);filter:blur(22px);opacity:.5}
-.hz-grain.b{left:64%;top:5.6%;width:10%;background:color-mix(in srgb,var(--blue) 55%,transparent);opacity:.42}
+.hz-grain.b{left:60%;top:5.6%;width:10%;background:color-mix(in srgb,var(--blue) 55%,transparent);opacity:.42}
 
-/* astronauta amarrado à escotilha */
-/* mesma altura da faixa: a cena não sobe para cima das luzes */
-.hz-scene{position:absolute;left:0;right:0;bottom:0;height:var(--hzh);z-index:2;pointer-events:none}
+/* astronauta com corda folgada */
+.hz-scene{position:absolute;left:0;right:0;bottom:0;height:calc(var(--hzh) + 9rem);z-index:2;pointer-events:none}
 .rope{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.rope .cord{fill:none;stroke:#C3D2E4;stroke-width:4.5;stroke-linecap:round;opacity:.9}
-.rope .cord-in{fill:none;stroke:#7E90AC;stroke-width:1.6;stroke-linecap:round;
-  stroke-dasharray:7 9;opacity:.85}
-.hatch{position:absolute;pointer-events:none}
-.diver{position:absolute;width:clamp(118px,14vw,180px);
+.rope path{fill:none;stroke:var(--ink-2);stroke-width:2.2;stroke-linecap:round;opacity:.75}
+html[data-theme="dark"] .rope path{stroke:#8FA2BE;opacity:.8}
+.diver{position:absolute;width:clamp(112px,13vw,168px);
   transform:translate3d(var(--dx,0),var(--dy,0),0);
   animation:bobble 7s ease-in-out infinite;will-change:transform;
-  filter:drop-shadow(0 16px 30px rgba(4,8,20,.5))}
-@keyframes bobble{0%,100%{rotate:-7deg}50%{rotate:8deg}}
+  filter:drop-shadow(0 14px 26px rgba(10,16,36,.35))}
+@keyframes bobble{0%,100%{rotate:-6deg}50%{rotate:7deg}}
 
+/* ==========================================================================
+   RODAPÉ
+   ========================================================================== */
 footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;z-index:4;background:var(--bg)}
 .foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--ink-3);
   font-family:var(--f-mono);font-size:.68rem;letter-spacing:.13em;text-transform:uppercase}
 
+/* ==========================================================================
+   RESPONSIVO
+   ========================================================================== */
 @media (max-width:980px){
   .hero-grid{grid-template-columns:1fr}
   .astro-hero{display:none}
@@ -517,114 +469,60 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
   .zbody .desc{font-size:.9rem;line-height:1.55}
   .zkpis .k b{font-size:1.2rem}
   .panel-space{height:clamp(560px,86vh,720px)}
-  .lights{grid-template-columns:repeat(2,1fr)}
 }
 @media (max-width:620px){
   .dots{grid-template-columns:repeat(10,1fr)}
   .pmetrics{grid-template-columns:1fr}
   .nav-links{display:none}
   .ps-copy{padding-right:1.2rem}
-  .lights{grid-template-columns:1fr}
-  .tseg b{font-size:.6rem}
 }
 @media (prefers-reduced-motion:reduce){
-  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;
-    transition-duration:.15s !important}
-  [data-fly]{opacity:1;transform:none}
-  .bar.from .col{height:100%}.bar.to .col{height:12.5%}
-  .dots i,.st-b u{background:var(--acc)}
-  .sheets i{transform:none;opacity:1}
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.15s !important}
+  [data-r]{opacity:1;transform:none}
 }
 </style>
 </head>
 <body class="locked">
-<!-- ============ ASSETS COMPARTILHADOS ============ -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-  <!-- Astronauta: construído sobre a referência do mascote — capacete redondo,
-       viseira escura com brilhos, traje branco de contorno navy, membros roliços.
-       Reutilizado no herói e no horizonte. -->
-  <symbol id="astro" viewBox="0 0 200 236">
-    <g stroke="#2B3050" stroke-width="6" stroke-linejoin="round" stroke-linecap="round">
-      <rect x="46" y="118" width="26" height="54" rx="13" fill="#D9E2EC" transform="rotate(20 59 145)"/>
-      <circle cx="53" cy="177" r="14" fill="#D9E2EC"/>
-      <rect x="102" y="166" width="28" height="50" rx="14" fill="#D9E2EC"/>
-      <rect x="98" y="199" width="39" height="23" rx="11.5" fill="#C7D3E1"/>
-      <rect x="60" y="110" width="80" height="60" rx="24" fill="#343F73"/>
-      <rect x="70" y="166" width="28" height="52" rx="14" fill="#F2F5F9"/>
-      <rect x="63" y="201" width="41" height="23" rx="11.5" fill="#FFFFFF"/>
-      <rect x="64" y="104" width="72" height="74" rx="30" fill="#F2F5F9"/>
-      <rect x="82" y="127" width="36" height="26" rx="9" fill="#8FAFCB"/>
-      <rect x="126" y="80" width="26" height="52" rx="13" fill="#F2F5F9" transform="rotate(34 139 106)"/>
-      <circle cx="157" cy="76" r="15" fill="#FFFFFF"/>
-      <circle cx="100" cy="60" r="50" fill="#F2F5F9"/>
-      <circle cx="100" cy="60" r="38" fill="#272F55" stroke-width="5"/>
-    </g>
-    <circle cx="93" cy="140" r="4.4" fill="#2A9165"/>
-    <circle cx="107" cy="140" r="4.4" fill="#343F73"/>
-    <ellipse cx="84" cy="44" rx="15" ry="9" fill="#FFFFFF" opacity=".9" transform="rotate(-32 84 44)"/>
-    <circle cx="116" cy="72" r="6.5" fill="#FFFFFF" opacity=".65"/>
-    <circle cx="124" cy="52" r="3.6" fill="#FFFFFF" opacity=".45"/>
-  </symbol>
-</defs></svg>
 
-<!-- ============ LANÇAMENTO ============ -->
+<!-- ================= LANÇAMENTO ================= -->
 <div id="launch">
   <canvas class="stars" aria-hidden="true"></canvas>
   <div class="launch-in">
-    <span class="brandline lab-s" data-fly="u">Hinove Fertilizantes Especiais · Núcleo Fiscal</span>
-
-    <div class="ship-hold" data-fly="u">
+    <span class="brandline lab-s" data-r>Hinove Fertilizantes Especiais · Núcleo Fiscal</span>
+    <div class="ship-hold" data-r>
       <span class="trail" aria-hidden="true"></span>
-      <!-- emblema: círculos da marca + linha circulada -->
-      <svg class="emblem" viewBox="0 0 300 300" aria-hidden="true">
-        <circle class="ring-thin" cx="150" cy="150" r="142"/>
-        <circle class="ring-dash" cx="150" cy="150" r="126"/>
-        <g class="lc">
-          <circle cx="150" cy="46" r="15" fill="#8FAFCB"/>
-          <circle cx="240" cy="196" r="15" fill="#343F73"/>
-          <circle cx="60" cy="196" r="15" fill="#2A9165"/>
-        </g>
-      </svg>
       <svg class="ship" viewBox="0 0 220 300" aria-label="Nave Hinove">
-        <defs><clipPath id="port"><circle cx="110" cy="112" r="31"/></clipPath></defs>
+        <defs><clipPath id="hole"><circle cx="110" cy="112" r="38"/></clipPath></defs>
         <g class="flame">
-          <path d="M110 232c15 14 24 32 24 50 0 0-10-9-24-9s-24 9-24 9c0-18 9-36 24-50z" fill="#F6C56A"/>
-          <path d="M110 244c8 9 14 21 14 32 0 0-6-6-14-6s-14 6-14 6c0-11 6-23 14-32z" fill="#FFF3D6"/>
+          <path d="M110 246c16 12 26 28 26 44 0 0-11-8-26-8s-26 8-26 8c0-16 10-32 26-44z" fill="#F6C56A"/>
+          <path d="M110 258c9 8 15 18 15 28 0 0-6-5-15-5s-15 5-15 5c0-10 6-20 15-28z" fill="#FFF0CB"/>
         </g>
-        <!-- asas -->
-        <path d="M72 156 L30 236 L72 212 Z" fill="#2A9165"/>
-        <path d="M148 156 L190 236 L148 212 Z" fill="#8FAFCB"/>
-        <path d="M72 156 L30 236 L72 212 Z" fill="#000" opacity=".14"/>
-        <!-- fuselagem -->
-        <path d="M110 14c26 40 38 88 38 138v60H72v-60c0-50 12-98 38-138z" fill="#F2F5F9"/>
-        <path d="M110 14c26 40 38 88 38 138v60h-20v-60c0-50-7-98-18-138z" fill="#D3DDE9"/>
-        <!-- bico -->
-        <path d="M110 14c11 17 20 38 26 61H84c6-23 15-44 26-61z" fill="#343F73"/>
-        <!-- listras -->
-        <rect x="74" y="182" width="72" height="7" rx="3.5" fill="#2A9165"/>
-        <rect x="74" y="196" width="72" height="4" rx="2" fill="#8FAFCB"/>
-        <!-- escotilha com a marca -->
-        <circle cx="110" cy="112" r="31" fill="#0E1424"/>
-        <g clip-path="url(#port)">
-          <circle cx="99" cy="103" r="21" fill="#8FAFCB"/>
-          <circle cx="120" cy="112" r="19" fill="#343F73" opacity=".92"/>
-          <circle cx="103" cy="126" r="14" fill="#2A9165" opacity=".92"/>
+        <path d="M62 176c-22 12-32 34-30 60 16-4 28-14 36-28z" fill="#2A9165"/>
+        <path d="M158 176c22 12 32 34 30 60-16-4-28-14-36-28z" fill="#8FAFCB"/>
+        <path d="M110 12c30 26 44 66 44 112v90H66v-90C66 78 80 38 110 12z" fill="#F2F5F9"/>
+        <path d="M130 20c17 26 24 60 24 104v90h-24z" fill="#D9E2EC"/>
+        <path d="M110 12c13 11 23 26 30 44H80c7-18 17-33 30-44z" fill="#343F73"/>
+        <rect x="76" y="212" width="68" height="26" rx="10" fill="#343F73"/>
+        <rect x="88" y="238" width="44" height="12" rx="6" fill="#2C355F"/>
+        <circle cx="110" cy="112" r="38" fill="#0E1424"/>
+        <g clip-path="url(#hole)">
+          <circle cx="96" cy="100" r="26" fill="#8FAFCB"/>
+          <circle cx="120" cy="110" r="23" fill="#343F73" opacity=".9"/>
+          <circle cx="101" cy="126" r="17" fill="#2A9165" opacity=".92"/>
         </g>
-        <circle cx="110" cy="112" r="31" fill="none" stroke="#F2F5F9" stroke-width="6"/>
-        <circle cx="110" cy="112" r="35" fill="none" stroke="#9FB3C9" stroke-width="1.6"/>
-        <!-- motor -->
-        <rect x="80" y="212" width="60" height="24" rx="9" fill="#343F73"/>
-        <rect x="92" y="228" width="36" height="11" rx="5.5" fill="#242C50"/>
+        <circle cx="110" cy="112" r="38" fill="none" stroke="#F2F5F9" stroke-width="7"/>
+        <circle cx="110" cy="112" r="42" fill="none" stroke="#C6D2E0" stroke-width="2"/>
+        <rect x="70" y="188" width="80" height="9" rx="4.5" fill="#2A9165"/>
       </svg>
     </div>
-
-    <h1 data-fly="u">Impulso que<br><span class="serif">transforma</span> a rotina</h1>
-    <p class="saying" data-fly="u">Menos <b>desculpability</b>, mais <b>accountability</b>.<br>Todos remando na mesma direção.</p>
-    <button class="go-btn" id="goBtn" data-fly="u"><span>Decolar</span></button>
+    <h1 data-r>Trabalho que roda<br><span class="serif">sozinho.</span></h1>
+    <p data-r>Seis rotinas fiscais em órbita — conferência, envio, expedição e classificação rodando sem a mão do analista.</p>
+    <button class="go-btn" id="goBtn" data-r><span>Decolar</span></button>
+    <button class="skip" id="skipBtn" data-r>pular introdução</button>
   </div>
 </div>
 
-<!-- ============ NAV ============ -->
+<!-- ================= NAV ================= -->
 <header class="nav">
   <div class="wrap nav-in">
     <a class="logo" href="#top" aria-label="Hinove Fertilizantes Especiais">
@@ -636,74 +534,91 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
       <span class="wm"><b>HINOVE</b><span>FERTILIZANTES ESPECIAIS</span></span>
     </a>
     <nav class="nav-links">
-      <a href="#impulso">Impulso</a><a href="#sistemas">Sistemas</a><a href="#horizonte">Horizonte</a>
+      <a href="#impulso">Impulso</a>
+      <a href="#sistemas">Sistemas</a>
+      <a href="#horizonte">Horizonte</a>
     </nav>
     <button class="toggle" id="themeBtn" aria-label="Alternar tema claro/escuro"></button>
   </div>
 </header>
 
 <main id="top">
+
+<!-- ================= HERO ================= -->
 <section class="hero wrap">
   <div class="hero-grid">
     <div>
-      <div class="hero-eyebrow lab" data-fly="l"><span class="dot"></span><span>Núcleo Fiscal · Automação Interna</span></div>
-      <h1 data-fly="l"><span>Impulso que</span><span class="serif">transforma</span><span>a rotina</span></h1>
-      <p class="sub" data-fly="l">Seis sistemas que assumiram a parte repetitiva da rotina fiscal da Hinove —
+      <div class="hero-eyebrow lab" data-r><span class="dot"></span><span>Núcleo Fiscal · Automação Interna</span></div>
+      <h1 data-r><span>Trabalho</span><span>que roda</span><span class="serif">sozinho.</span></h1>
+      <p class="sub" data-r>Seis sistemas que assumiram a parte repetitiva da rotina fiscal da Hinove —
         conferência, envio, expedição e classificação. O analista deixou de <b>procurar erro</b>
         para voltar a <b>analisar número</b>.</p>
     </div>
-    <svg class="astro-hero" viewBox="0 0 200 236" data-fly="r" aria-hidden="true">
-      <use href="#astro"/>
+    <svg class="astro-hero" viewBox="0 0 240 260" aria-hidden="true" data-r>
+      <defs>
+        <linearGradient id="suit" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#D6DEEA"/></linearGradient>
+        <linearGradient id="flameG" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#F5B841"/><stop offset="1" stop-color="#E2542F"/></linearGradient>
+      </defs>
+      <path d="M64 196c-22 6-38 22-44 42 22-4 40-14 52-28z" fill="url(#flameG)"/>
+      <g transform="rotate(-32 130 180)">
+        <path d="M92 168h84c22 0 40 10 48 22-8 12-26 22-48 22H92c-14 0-24-10-24-22s10-22 24-22z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M176 168c22 0 40 10 48 22-8 12-26 22-48 22z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <circle cx="128" cy="190" r="16" fill="#5EC8DE" stroke="#2B3050" stroke-width="5"/>
+        <path d="M96 168c-6-14-4-24 2-30 8 6 12 16 12 30z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+        <path d="M96 212c-6 14-4 24 2 30 8-6 12-16 12-30z" fill="#D64B3A" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      </g>
+      <path d="M96 128c-14 6-22 20-20 36 2 14 14 24 30 24h30c16 0 26-12 26-26 0-18-12-32-30-36z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M150 126c10-16 26-22 38-16 10 5 12 18 4 26-8 8-22 8-30 0z" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M92 150c-12 4-18 16-14 26 4 9 16 12 24 6" fill="url(#suit)" stroke="#2B3050" stroke-width="5" stroke-linejoin="round"/>
+      <circle cx="128" cy="76" r="52" fill="url(#suit)" stroke="#2B3050" stroke-width="5"/>
+      <circle cx="128" cy="76" r="40" fill="#232A48" stroke="#2B3050" stroke-width="4"/>
+      <ellipse cx="112" cy="60" rx="15" ry="9" fill="#fff" opacity=".85" transform="rotate(-32 112 60)"/>
+      <circle cx="150" cy="86" r="6" fill="#fff" opacity=".7"/>
+      <rect x="112" y="150" width="34" height="22" rx="7" fill="#8FAFCB" stroke="#2B3050" stroke-width="4"/>
     </svg>
   </div>
 </section>
-<!-- ============ IMPULSO ============ -->
+
+<!-- ================= IMPULSO ================= -->
 <section class="sec wrap" id="impulso">
   <div class="sec-head">
-    <h2 data-fly="l">O que a automação <span class="serif">devolveu</span> para o time.</h2>
-    <span class="note lab" data-fly="r">Indicadores internos</span>
+    <h2 data-r>O que a automação <span class="serif">devolveu</span> para o time.</h2>
+    <span class="note lab" data-r>Indicadores internos</span>
   </div>
 
-  <div class="term-bar" data-fly="u">
-    <span class="led"></span><span>núcleo fiscal · leitura contínua</span>
-    <span class="grow"></span><span id="termClock">--:--</span><span class="cursor"></span>
-  </div>
-
-  <div class="hero-metric" data-fly="u">
-    <span class="scanline" aria-hidden="true"></span>
+  <div class="hero-metric" id="heroMetric" data-r>
     <div class="hm-label">
       Horas semanais gastas em relatórios e conferências repetitivas.
       <small>Por analista · média do núcleo fiscal</small>
     </div>
     <div class="hm-right">
       <div class="bars">
-        <div class="bar from"><span class="v">20h</span><span class="col"></span><span class="t">antes</span></div>
-        <div class="bar to"><span class="v">2h30</span><span class="col"></span><span class="t">depois</span></div>
+        <div class="bar from"><span class="v">20h</span><span class="col" style="--h:0%" data-h="100%"></span><span class="t">antes</span></div>
+        <div class="bar to"><span class="v">2h30</span><span class="col" style="--h:0%" data-h="12.5%"></span><span class="t">depois</span></div>
       </div>
       <div class="hm-to">
-        <span class="big">−87,5%</span>
+        <span class="big" id="hmDrop">−87,5%</span>
         <span class="hm-cap">de queda no tempo gasto</span>
       </div>
     </div>
   </div>
 
   <div class="m-grid">
-    <div class="m-card" style="--acc:#5E86AC" data-fly="u">
-      <span class="m-tick">▚ lote</span>
+    <div class="m-card" style="--acc:#5E86AC" data-r>
       <div class="big" data-count="8000">0</div>
       <div class="lead">documentos conferidos em 2 minutos</div>
       <div class="sub">O que era uma tarde inteira de conferência cabe num intervalo de café.</div>
       <div class="m-viz"><div class="dots" id="dotsViz"></div></div>
     </div>
-    <div class="m-card" style="--acc:#343F73" data-fly="u">
-      <span class="m-tick">▚ regras</span>
+    <div class="m-card" style="--acc:#343F73" data-r>
       <div class="big"><span class="pre">+</span><span data-count="60">0</span></div>
       <div class="lead">regras tributárias mapeadas</div>
       <div class="sub">Aplicadas em mais de 6 estados do Brasil, sem consulta manual.</div>
       <div class="m-viz"><div class="states" id="statesViz"></div></div>
     </div>
-    <div class="m-card" style="--acc:#2A9165" data-fly="u">
-      <span class="m-tick">▚ saída</span>
+    <div class="m-card" style="--acc:#2A9165" data-r>
       <div class="big"><span class="pre">+</span><span data-count="5">0</span></div>
       <div class="lead">relatórios automatizados</div>
       <div class="sub">O analista recebe o resultado pronto e gasta o tempo na análise.</div>
@@ -712,18 +627,21 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
   </div>
 </section>
 
-<!-- ============ SISTEMAS ============ -->
+<!-- ================= SISTEMAS ================= -->
 <section class="sec wrap" id="sistemas">
   <div class="sec-head">
-    <h2 data-fly="l">Seis rotinas em <span class="serif">órbita.</span></h2>
-    <span class="note lab" data-fly="r">Clique num planeta para aproximar</span>
+    <h2 data-r>Seis rotinas em <span class="serif">órbita.</span></h2>
+    <span class="note lab" data-r>Clique num planeta para aproximar</span>
   </div>
-  <div class="panel-space" id="panel" data-fly="u">
+
+  <div class="panel-space" id="panel" data-r>
     <canvas class="stars" id="panelStars" aria-hidden="true"></canvas>
+
     <div class="ps-copy">
       <h3>O núcleo e o que <span class="serif">gira</span> em volta.</h3>
       <p>Cada planeta é um sistema que assumiu uma tarefa repetitiva do fechamento fiscal.</p>
     </div>
+
     <div class="system" id="systemLayer">
       <svg class="orbits" id="orbitsSvg" aria-hidden="true"></svg>
       <div class="sun" id="sunEl" style="--d:70px">
@@ -731,8 +649,10 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
         <span class="sun-label">Núcleo Fiscal</span>
       </div>
     </div>
+
     <span class="ps-hint">Passe o mouse para acelerar · clique para aproximar</span>
     <div class="ps-vign"></div>
+
     <div class="zoomview" id="zoomView">
       <div class="zsphere" id="zsphere"><span class="swirl"></span></div>
       <svg class="scan" id="scanSvg" viewBox="0 0 400 400" preserveAspectRatio="none"></svg>
@@ -742,59 +662,40 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
   </div>
 </section>
 
-<!-- ============ HORIZONTE ============ -->
-<section class="horizonte" id="horizonte">
-  <div class="wrap">
-    <div class="hz-grid">
-      <div>
-        <h2 data-fly="l">Automatizar não é cortar gente.<br><span class="serif">É devolver o tempo</span> para pensar.</h2>
-        <p data-fly="l">Cada rotina que entra em órbita libera horas que voltam para conferência analítica,
-          planejamento tributário e recuperação de crédito — o trabalho que só uma pessoa faz bem.
-          Selecione os sistemas ao lado e veja o dia do analista mudar de forma.</p>
-      </div>
-      <div class="projlist" id="projList" data-fly="r"></div>
+<!-- ================= HORIZONTE ================= -->
+<section class="sec horizonte" id="horizonte">
+  <div class="wrap hz-grid">
+    <div>
+      <h2 data-r>Automatizar não é cortar gente.<br><span class="serif">É devolver o tempo</span> para pensar.</h2>
+      <p data-r>Cada rotina que entra em órbita libera horas que voltam para conferência analítica,
+        planejamento tributário e recuperação de crédito — o trabalho que só uma pessoa faz bem.
+        As próximas missões seguem a mesma regra: primeiro o que é repetitivo, previsível e auditável.</p>
     </div>
-
-    <div class="timebox">
-      <h3 data-fly="u">No que é gasto o tempo de um analista?</h3>
-      <div class="tsub" data-fly="u"><span id="selCount">Nenhum sistema</span> selecionado</div>
-      <div class="tbar" data-fly="u">
-        <div class="tseg g" id="segG"><b id="pctG">12%</b></div>
-        <div class="tseg p" id="segP"><b id="pctP">30%</b></div>
-        <div class="tseg r" id="segR"><b id="pctR">58%</b></div>
-      </div>
-      <div class="tlegend" data-fly="u">
-        <span><i style="background:#3FBE85"></i>Analisando com estratégia</span>
-        <span><i style="background:#A585D6"></i>Operacionalizando</span>
-        <span><i style="background:#B85055"></i>Trabalho repetitivo e moroso</span>
-      </div>
-      <div class="lights" id="lights" data-fly="u">
-        <div class="lt"><span class="bulb"></span><span>Menor margem de erro</span></div>
-        <div class="lt"><span class="bulb"></span><span>Mais confiança no trabalho</span></div>
-        <div class="lt"><span class="bulb"></span><span>Melhoria contínua</span></div>
-        <div class="lt"><span class="bulb"></span><span>Menor desculpability</span></div>
-      </div>
-    </div>
+    <div class="projlist" id="projList" data-r></div>
   </div>
 
-  <div class="hz-bloom" aria-hidden="true"></div>
-  <div class="hz-sun" aria-hidden="true"></div>
   <div class="hz-horizon" aria-hidden="true">
     <div class="hz-sphere"><span class="hz-grain"></span><span class="hz-grain b"></span></div>
   </div>
-
   <div class="hz-scene" id="hzScene" aria-hidden="true">
-    <svg class="rope"><path class="cord" id="ropePath" d=""/><path class="cord-in" id="ropePath2" d=""/></svg>
-    <!-- escotilha: a corda sai de algo -->
-    <svg class="hatch" id="hatch" width="86" height="86" viewBox="0 0 86 86">
-      <circle cx="43" cy="43" r="30" fill="#243154" stroke="#8FAFCB" stroke-width="3"/>
-      <circle cx="43" cy="43" r="20" fill="#131C33" stroke="#5E86AC" stroke-width="2"/>
-      <circle cx="43" cy="43" r="7" fill="#8FAFCB"/>
-      <g stroke="#8FAFCB" stroke-width="2.6" stroke-linecap="round">
-        <path d="M43 13v8M43 65v8M13 43h8M65 43h8"/>
-      </g>
+    <svg class="rope"><path id="ropePath" d=""/></svg>
+    <svg class="diver" id="diver" viewBox="0 0 160 190">
+      <rect x="86" y="120" width="24" height="46" rx="12" fill="#D9E2EC"/>
+      <rect x="96" y="74" width="46" height="22" rx="11" fill="#D9E2EC" transform="rotate(24 96 74)"/>
+      <rect x="44" y="74" width="30" height="44" rx="12" fill="#343F73"/>
+      <rect x="50" y="84" width="18" height="8" rx="4" fill="#2A9165"/>
+      <rect x="56" y="120" width="26" height="50" rx="13" fill="#F2F5F9"/>
+      <rect x="54" y="158" width="32" height="18" rx="9" fill="#E3EAF2"/>
+      <rect x="52" y="70" width="60" height="60" rx="24" fill="#F2F5F9"/>
+      <rect x="68" y="88" width="30" height="20" rx="7" fill="#8FAFCB"/>
+      <circle cx="76" cy="98" r="3.4" fill="#2A9165"/><circle cx="88" cy="98" r="3.4" fill="#343F73"/>
+      <rect x="96" y="52" width="44" height="22" rx="11" fill="#F2F5F9" transform="rotate(-28 96 52)"/>
+      <circle cx="134" cy="34" r="13" fill="#F2F5F9"/>
+      <circle cx="82" cy="48" r="40" fill="#F2F5F9"/>
+      <circle cx="82" cy="48" r="30" fill="#28305A"/>
+      <ellipse cx="70" cy="36" rx="11" ry="7" fill="#FFFFFF" opacity=".85" transform="rotate(-30 70 36)"/>
+      <circle cx="96" cy="58" r="4.6" fill="#FFFFFF" opacity=".6"/>
     </svg>
-    <svg class="diver" id="diver" viewBox="0 0 200 236"><use href="#astro"/></svg>
   </div>
 </section>
 
@@ -805,15 +706,20 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
   </div>
 </footer>
 </main>
+
 <script>
+/* ==========================================================================
+   DADOS
+   ========================================================================== */
 const PROJECTS=[
   { id:'xmlbot', name:'XMLBot', status:'Em produção', wip:false,
     c:['#7FD9C0','#2E9E8B','#0E4A45'], f:.34, r:11, phase:.4,
     kick:'Nenhuma tag passa batida.',
     desc:'Validador de tags de XML. Lê o arquivo campo a campo e aponta estrutura inválida, tag ausente e valor fora do padrão <b>antes</b> do documento seguir para escrituração.',
     scan:['TAGS','SCHEMA','CAMPOS','ASSINATURA'],
-    kpis:[['100%','dos XML validados'],['&lt; 1s','por arquivo'],['0','erro de estrutura']],
+    kpis:[['100%','dos XML validados na entrada'],['&lt; 1s','por arquivo'],['0','erro de estrutura']],
     metrics:[['48h','horas liberadas / mês'],['9.500','documentos / mês'],['100%','precisão apurada']] },
+
   { id:'autoreinf', name:'AutoReinf', status:'Em produção', wip:false,
     c:['#7E8BD2','#343F73','#151B3A'], f:.47, r:14, phase:2.1,
     kick:'Do arquivo ao recibo, sem digitação.',
@@ -821,38 +727,44 @@ const PROJECTS=[
     scan:['EVENTO','CNPJ','RETENÇÃO','RECIBO'],
     kpis:[['2.800','eventos / mês'],['96h','liberadas / mês'],['0','erros de digitação']],
     metrics:[['96h','horas liberadas / mês'],['2.800','documentos / mês'],['100%','precisão apurada']] },
+
   { id:'gerarpendentes', name:'GerarPendentes', status:'Em produção', wip:false,
     c:['#C0A2E0','#7A56B0','#33195C'], f:.60, r:13, phase:4.2,
     kick:'O que ficou para trás, na sua mesa.',
     desc:'Gera o relatório de documentos fiscais pendentes e mostra onde o processo travou — captando <b>falhas de processo, de escrituração e de pagamento</b> antes que virem passivo.',
     scan:['PROCESSO','ESCRITURAÇÃO','PAGAMENTO','PRAZO'],
-    kpis:[['3','tipos de falha'],['diário','ciclo de geração'],['100%','da base varrida']],
+    kpis:[['3','tipos de falha rastreados'],['diário','ciclo de geração'],['100%','da base varrida']],
     metrics:[['60h','horas liberadas / mês'],['5.400','documentos / mês'],['97%','precisão apurada']] },
+
   { id:'fiscalbot', name:'FiscalBot', status:'Em produção', wip:false,
     c:['#A9C6DE','#5E86AC','#20325A'], f:.74, r:18, phase:1.1, ring:true,
     kick:'O revisor que nunca pisca.',
     desc:'Varre a base de notas em busca de inconsistências e desvios de conformidade tributária. Elimina <b>99% das validações gerais</b> — CFOP, CST, alíquota, base e cadastro — e entrega ao analista só o que exige julgamento.',
     scan:['CFOP','CST','ALÍQUOTA','CADASTRO'],
-    kpis:[['99%','sem toque humano'],['8.000','docs em 2 min'],['+60','regras aplicadas']],
+    kpis:[['99%','sem toque humano'],['8.000','docs em 2 minutos'],['+60','regras aplicadas']],
     metrics:[['320h','horas liberadas / mês'],['14.000','documentos / mês'],['99%','precisão apurada']] },
+
   { id:'faturabot', name:'FaturaBot', status:'Em produção', wip:false,
     c:['#BFD8EA','#7FA6C8','#2A4A70'], f:.88, r:16, phase:5.4, moon:{r:5,dist:2.7,speed:1.6},
     kick:'A expedição fecha sozinha.',
     desc:'Quatro relatórios de expedição gerados automaticamente. Reduz a margem de erro manual no fechamento e <b>captura erros possíveis</b> antes do faturamento sair — a lua ao redor dele é a conferência que roda logo depois.',
     scan:['EXPEDIÇÃO','VOLUMES','FATURA','DIVERGÊNCIA'],
-    kpis:[['4','relatórios'],['~0','erro manual'],['100%','antes da emissão']],
+    kpis:[['4','relatórios de expedição'],['~0','margem de erro manual'],['100%','conferido antes da emissão']],
     metrics:[['72h','horas liberadas / mês'],['3.200','documentos / mês'],['98%','precisão apurada']] },
+
   { id:'cteauto', name:'CT-e Auto v2', status:'Em construção', wip:true,
     c:['#4FC38C','#2A9165','#0C452D'], f:1, r:14, phase:3.3,
     kick:'A próxima órbita.',
     desc:'Identifica os conhecimentos de transporte de fretes tomados e faz a classificação tributária de ponta a ponta — sem planilha intermediária. Hoje em piloto, com meta de <b>90% de classificação sem intervenção</b>.',
     scan:['CT-E','FRETE','CLASSIF.','CRÉDITO'],
-    kpis:[['68%','do escopo'],['4.500','CT-e / mês alvo'],['piloto','fase atual']],
+    kpis:[['68%','do escopo concluído'],['4.500','CT-e / mês no alvo'],['piloto','fase atual']],
     metrics:[['64h','horas projetadas / mês'],['4.500','documentos / mês'],['90%','precisão alvo']] }
 ];
 const RED=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---- tema ---- */
+/* ==========================================================================
+   TEMA
+   ========================================================================== */
 (function(){
   const root=document.documentElement,btn=document.getElementById('themeBtn');
   root.dataset.theme=localStorage.getItem('hinove-theme')||'dark';
@@ -862,81 +774,102 @@ const RED=matchMedia('(prefers-reduced-motion: reduce)').matches;
   });
 })();
 
-/* ---- entradas voando pelos lados ---- */
-const Fly=(function(){
+/* ==========================================================================
+   REVEAL — elementos populando a tela
+   ========================================================================== */
+const Reveal=(function(){
   function show(scope,base){
-    const els=[...scope.querySelectorAll('[data-fly]')].filter(e=>!e.classList.contains('in'));
-    els.forEach((el,i)=>{el.style.transitionDelay=((base||0)+i*160)+'ms';el.classList.add('in');});
+    const els=[...scope.querySelectorAll('[data-r]')].filter(e=>!e.classList.contains('in'));
+    els.forEach((el,i)=>{el.style.transitionDelay=((base||0)+i*90)+'ms';el.classList.add('in');});
   }
   const io=new IntersectionObserver(es=>es.forEach(e=>{
     if(!e.isIntersecting) return; io.unobserve(e.target);
-    const sibs=[...e.target.parentElement.querySelectorAll(':scope > [data-fly]')];
-    e.target.style.transitionDelay=(Math.max(0,sibs.indexOf(e.target))*150)+'ms';
+    const sibs=[...e.target.parentElement.querySelectorAll(':scope > [data-r]')];
+    e.target.style.transitionDelay=(Math.max(0,sibs.indexOf(e.target))*90)+'ms';
     e.target.classList.add('in');
-  }),{threshold:.12,rootMargin:'0px 0px -6% 0px'});
-  return {show,watch:root=>root.querySelectorAll('[data-fly]').forEach(el=>io.observe(el))};
+  }),{threshold:.15,rootMargin:'0px 0px -8% 0px'});
+  function watch(root){root.querySelectorAll('[data-r]').forEach(el=>io.observe(el));}
+  return {show,watch};
 })();
-Fly.show(document.getElementById('launch'),150);
+Reveal.show(document.getElementById('launch'),120);
 
-/* ---- estrelas + warp ---- */
+/* ==========================================================================
+   ESTRELAS (+ warp de velocidade da luz)
+   ========================================================================== */
 function makeStars(canvas){
   const ctx=canvas.getContext('2d');
-  let stars=[],w=0,h=0,t=0,last=0,warp=0,wt=-1;
+  let stars=[],w=0,h=0,t=0,last=0,warp=0,wt=-1;   /* wt = tempo desde o disparo */
   const dpr=Math.min(devicePixelRatio||1,1.5);
   function build(){
     const r=canvas.getBoundingClientRect();
     if(!r.width||!r.height) return;
     w=canvas.width=r.width*dpr; h=canvas.height=r.height*dpr;
     const n=Math.round((r.width*r.height)/10000);
-    stars=Array.from({length:n},()=>({x:Math.random()*w,y:Math.random()*h,
-      r:(Math.random()*1.4+.35)*dpr,a:Math.random()*.65+.2,
-      sp:(Math.random()*.13+.03)*dpr,ph:Math.random()*6.283}));
+    stars=Array.from({length:n},()=>({
+      x:Math.random()*w,y:Math.random()*h,r:(Math.random()*1.4+.35)*dpr,
+      a:Math.random()*.65+.2,sp:(Math.random()*.13+.03)*dpr,ph:Math.random()*6.283}));
   }
   function frame(now){
     requestAnimationFrame(frame);
     if(document.hidden||now-last<32) return;
     const dt=Math.min((now-last)/1000,.06); last=now; t+=dt;
+    /* envelope: sobe rápido, segura, e desacelera — dá tempo do olho ver */
     if(wt>=0){
       wt+=dt;
-      if(wt>1.6){wt=-1;warp=0;}
-      else{const rise=Math.min(wt/.28,1),fall=wt<.8?1:Math.max(0,1-(wt-.8)/.8);warp=Math.min(rise,fall);}
+      if(wt>1.25){wt=-1;warp=0;}
+      else{
+        const rise=Math.min(wt/.26,1);
+        const fall=wt<.58?1:Math.max(0,1-(wt-.58)/.62);
+        warp=Math.min(rise,fall);
+      }
     }
     ctx.clearRect(0,0,w,h);
     const cx=w/2,cy=h/2;
     for(const s of stars){
       s.y-=s.sp; if(s.y<-3){s.y=h+3;s.x=Math.random()*w;}
-      const tw=.55+.45*Math.sin(t*1.3+s.ph),alpha=(s.a*tw).toFixed(3);
+      const tw=.55+.45*Math.sin(t*1.3+s.ph);
+      const alpha=(s.a*tw).toFixed(3);
       if(warp>.02){
-        const dx=s.x-cx,dy=s.y-cy,len=warp*.9;
+        /* rastro radial: quanto mais longe do centro, mais comprido */
+        const dx=s.x-cx,dy=s.y-cy;
+        const len=warp*.85;
         ctx.strokeStyle='rgba(206,222,240,'+alpha+')';
         ctx.lineWidth=s.r; ctx.lineCap='round';
-        ctx.beginPath(); ctx.moveTo(s.x,s.y); ctx.lineTo(s.x+dx*len,s.y+dy*len); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(s.x,s.y);
+        ctx.lineTo(s.x+dx*len,s.y+dy*len); ctx.stroke();
       }else{
-        ctx.beginPath(); ctx.fillStyle='rgba(206,222,240,'+alpha+')';
+        ctx.beginPath();
+        ctx.fillStyle='rgba(206,222,240,'+alpha+')';
         ctx.arc(s.x,s.y,s.r,0,6.2832); ctx.fill();
       }
     }
   }
   build(); requestAnimationFrame(frame);
   addEventListener('resize',build,{passive:true});
-  return {rebuild:build,warp(){if(!RED) wt=0;}};
+  return {rebuild:build,warp(){ if(!RED) wt=0; }};
 }
 const launchStars=makeStars(document.querySelector('#launch canvas'));
 const panelStars=makeStars(document.getElementById('panelStars'));
 
-/* ---- sistema solar ---- */
+/* ==========================================================================
+   SISTEMA SOLAR
+   ========================================================================== */
 const Solar=(function(){
-  const panel=document.getElementById('panel'),layer=document.getElementById('systemLayer');
-  const svg=document.getElementById('orbitsSvg'),sunEl=document.getElementById('sunEl');
+  const panel=document.getElementById('panel');
+  const layer=document.getElementById('systemLayer');
+  const svg=document.getElementById('orbitsSvg');
+  const sunEl=document.getElementById('sunEl');
   const NS='http://www.w3.org/2000/svg';
-  let W=0,H=0,cx=0,cy=0,R=0,scale=1,bloom=0,bloomTarget=1;
-  let running=false,visible=true,paused=false,hovered=null,spd=1,spdT=1;
+  let W=0,H=0,cx=0,cy=0,R=0,scale=1;
+  let bloom=0,bloomTarget=1,running=false,visible=true,paused=false;
+  let hovered=null,spd=1,spdT=1;
   const nodes=[];
+
   PROJECTS.forEach(p=>{
     const el=document.createElement('button');
     el.className='planet'; el.type='button'; el.dataset.id=p.id;
     el.setAttribute('aria-label',p.name+' — '+p.status);
-    el.style.setProperty('--c1',p.c[0]);el.style.setProperty('--c2',p.c[1]);el.style.setProperty('--c3',p.c[2]);
+    el.style.setProperty('--c1',p.c[0]); el.style.setProperty('--c2',p.c[1]); el.style.setProperty('--c3',p.c[2]);
     el.innerHTML=(p.ring?'<span class="pring"></span>':'')+'<span class="pbody"></span>'+
       '<span class="plabel"><b>'+p.name+'</b><i>'+p.status+'</i></span>';
     layer.appendChild(el);
@@ -944,16 +877,20 @@ const Solar=(function(){
     let moonEl=null;
     if(p.moon){moonEl=document.createElement('span');moonEl.className='moon';
       moonEl.innerHTML='<span class="moon-b"></span>';layer.appendChild(moonEl);}
-    nodes.push({p,el,ell,moonEl,ang:p.phase,w:(0.085/Math.pow(p.f,1.5)),x:0,y:0,
-      ma:Math.random()*6.283,zoomed:false});
+    /* devagar: uma volta interna leva ~2 min */
+    const w=(0.085/Math.pow(p.f,1.5));
+    nodes.push({p,el,ell,moonEl,ang:p.phase,w,x:0,y:0,ma:Math.random()*6.283,zoomed:false});
     el.addEventListener('click',()=>Zoom.enter(p.id));
     el.addEventListener('pointerenter',()=>{hovered=p.id;ell.classList.add('hot');});
     el.addEventListener('pointerleave',()=>{if(hovered===p.id)hovered=null;ell.classList.remove('hot');});
     el.addEventListener('focus',()=>{hovered=p.id;ell.classList.add('hot');});
     el.addEventListener('blur',()=>{if(hovered===p.id)hovered=null;ell.classList.remove('hot');});
   });
+
+  /* mouse sobre o painel → acelera */
   panel.addEventListener('pointerenter',()=>{spdT=2.3;});
   panel.addEventListener('pointerleave',()=>{spdT=1;});
+
   const TILT=.36;
   function measure(){
     const r=panel.getBoundingClientRect();
@@ -973,6 +910,7 @@ const Solar=(function(){
     });
     step(0);
   }
+
   function step(dt){
     if(RED) bloom=bloomTarget; else bloom+=(bloomTarget-bloom)*Math.min(dt*2.2,1);
     svg.style.opacity=bloom.toFixed(3);
@@ -984,19 +922,19 @@ const Solar=(function(){
       const co=Math.cos(n.ang),si=Math.sin(n.ang);
       const x=cx+co*n.a*bloom,y=cy+si*n.b*bloom;
       n.x=x;n.y=y;
-      const depth=(si+1)/2,sc=.82+.30*depth;
+      const depth=(si+1)/2, sc=.82+.30*depth;
       n.el.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) scale('+sc.toFixed(3)+')';
       n.el.style.opacity=(.62+.38*depth).toFixed(3);
       n.el.style.zIndex=String(100+Math.round(si*40));
       if(n.moonEl){
         if(!RED) n.ma+=n.p.moon.speed*dt*spd;
         const md=n.p.r*n.p.moon.dist*scale;
-        n.moonEl.style.transform='translate3d('+(x+Math.cos(n.ma)*md).toFixed(1)+'px,'+
-          (y+Math.sin(n.ma)*md*.5).toFixed(1)+'px,0)';
+        n.moonEl.style.transform='translate3d('+(x+Math.cos(n.ma)*md).toFixed(1)+'px,'+(y+Math.sin(n.ma)*md*.5).toFixed(1)+'px,0)';
         n.moonEl.style.zIndex=String(100+Math.round(si*40)+(Math.sin(n.ma)>0?1:-1));
       }
     }
   }
+
   let last=0;
   function tick(now){
     if(!running) return;
@@ -1009,18 +947,24 @@ const Solar=(function(){
   function start(){if(!running){running=true;last=performance.now();requestAnimationFrame(tick);}}
   new IntersectionObserver(es=>{visible=es[0].isIntersecting;},{threshold:0}).observe(panel);
   addEventListener('resize',measure,{passive:true});
-  return {measure,start,step,nodes,node:id=>nodes.find(n=>n.p.id===id),
-    setPaused(v){paused=v;},center(){return{cx,cy,W,H,scale};}};
+  return {measure,start,step,nodes,
+    node:id=>nodes.find(n=>n.p.id===id),
+    setPaused(v){paused=v;},
+    center(){return{cx,cy,W,H,scale};}};
 })();
-</script>
-<script>
-/* ---- zoom + varredura ---- */
+
+/* ==========================================================================
+   ZOOM + VARREDURA
+   ========================================================================== */
 const Zoom=(function(){
-  const panel=document.getElementById('panel'),sphere=document.getElementById('zsphere');
-  const scan=document.getElementById('scanSvg'),body=document.getElementById('zbody');
+  const panel=document.getElementById('panel');
+  const sphere=document.getElementById('zsphere');
+  const scan=document.getElementById('scanSvg');
+  const body=document.getElementById('zbody');
   const sw=document.getElementById('switcher');
   let current=null,timers=[];
-  const ZD=460, NODES=[[104,132],[252,102],[150,262],[286,296]];
+  const ZD=460;                                  /* diâmetro base, nítido */
+
   PROJECTS.forEach(p=>{
     const b=document.createElement('button');
     b.type='button'; b.dataset.id=p.id; b.style.setProperty('--sc',p.c[0]);
@@ -1028,11 +972,17 @@ const Zoom=(function(){
     b.addEventListener('click',()=>enter(p.id));
     sw.appendChild(b);
   });
+
+  /* reticulado de varredura */
+  /* pontos da varredura — cada quadrado marca algo que o robô confere */
+  const NODES=[[104,132],[252,102],[150,262],[286,296]];
   function buildScan(p){
     const m=24,S=400;
     let g='<g class="brk">'+
-      ['M'+m+' '+(m+44)+'V'+m+'H'+(m+44),'M'+(S-m-44)+' '+m+'H'+(S-m)+'V'+(m+44),
-       'M'+(S-m)+' '+(S-m-44)+'V'+(S-m)+'H'+(S-m-44),'M'+(m+44)+' '+(S-m)+'H'+m+'V'+(S-m-44)]
+      ['M'+m+' '+(m+44)+'V'+m+'H'+(m+44),
+       'M'+(S-m-44)+' '+m+'H'+(S-m)+'V'+(m+44),
+       'M'+(S-m)+' '+(S-m-44)+'V'+(S-m)+'H'+(S-m-44),
+       'M'+(m+44)+' '+(S-m)+'H'+m+'V'+(S-m-44)]
       .map(d=>'<path d="'+d+'"/>').join('')+'</g>';
     g+='<line class="sweep" x1="0" y1="0" x2="400" y2="0"/>';
     NODES.forEach((n,i)=>{
@@ -1044,55 +994,81 @@ const Zoom=(function(){
     });
     scan.innerHTML=g;
   }
+
   function render(p){
-    body.innerHTML='<span class="zpill'+(p.wip?' wip':'')+'"><span class="bt"></span>'+p.status+'</span>'+
-      '<h4>'+p.name+'</h4><p class="kick">'+p.kick+'</p><p class="desc">'+p.desc+'</p>'+
+    body.innerHTML=
+      '<span class="zpill'+(p.wip?' wip':'')+'"><span class="bt"></span>'+p.status+'</span>'+
+      '<h4>'+p.name+'</h4>'+
+      '<p class="kick">'+p.kick+'</p>'+
+      '<p class="desc">'+p.desc+'</p>'+
       '<div class="zkpis">'+p.kpis.map(k=>'<div class="k"><b>'+k[0]+'</b><span>'+k[1]+'</span></div>').join('')+'</div>'+
       '<button class="zback" type="button">← Voltar ao sistema</button>';
     body.querySelector('.zback').addEventListener('click',leave);
   }
+
   function enter(id){
     const p=PROJECTS.find(x=>x.id===id); if(!p) return;
     timers.forEach(clearTimeout); timers=[];
     const prev=current; current=id;
-    const n=Solar.node(id),c=Solar.center();
-    panelStars.warp();
+    const n=Solar.node(id), c=Solar.center();
+
+    panelStars.warp();                            /* estrelas esticam */
     panel.classList.remove('scanning','scanned');
+
     [sphere,scan].forEach(el=>{
       el.style.setProperty('--zd',ZD+'px');
-      el.style.setProperty('--c1',p.c[0]);el.style.setProperty('--c2',p.c[1]);el.style.setProperty('--c3',p.c[2]);
+      el.style.setProperty('--c1',p.c[0]);
+      el.style.setProperty('--c2',p.c[1]);
+      el.style.setProperty('--c3',p.c[2]);
     });
+
+    /* parte do lugar exato do planeta, no tamanho exato dele */
     if(!prev){
       const d=n.p.r*2*c.scale;
-      [sphere,scan].forEach(el=>{el.style.transition='none';
-        el.style.setProperty('--zx',n.x+'px');el.style.setProperty('--zy',n.y+'px');
-        el.style.setProperty('--zs',(d/ZD).toFixed(4));});
+      [sphere,scan].forEach(el=>{
+        el.style.transition='none';
+        el.style.setProperty('--zx',n.x+'px');
+        el.style.setProperty('--zy',n.y+'px');
+        el.style.setProperty('--zs',(d/ZD).toFixed(4));
+      });
       void sphere.offsetWidth;
     }
     n.zoomed=true; n.el.style.opacity='0';
     if(prev&&prev!==id){const q=Solar.node(prev);q.zoomed=false;q.el.style.opacity='';}
+
     panel.classList.add('zoom');
+    Solar.setPaused(false);
+
+    /* alvo: grande, à esquerda, mordendo a borda como um planeta próximo */
     const narrow=c.W<980;
+    /* no celular o texto ocupa a metade de baixo: a esfera sobe e encolhe */
     const targetD=narrow?Math.min(c.W*.70,c.H*.28):Math.min(c.W*.62,c.H*.92);
     requestAnimationFrame(()=>{
-      [sphere,scan].forEach(el=>{el.style.transition='';
+      [sphere,scan].forEach(el=>{
+        el.style.transition='';
         el.style.setProperty('--zx',(narrow?c.W*.46:c.W*.30)+'px');
         el.style.setProperty('--zy',(narrow?c.H*.19:c.H*.52)+'px');
-        el.style.setProperty('--zs',(targetD/ZD).toFixed(4));});
+        el.style.setProperty('--zs',(targetD/ZD).toFixed(4));
+      });
     });
+
     buildScan(p); render(p);
     [...sw.children].forEach(b=>b.classList.toggle('on',b.dataset.id===id));
     timers.push(setTimeout(()=>panel.classList.add('scanning'),RED?0:700));
     timers.push(setTimeout(()=>panel.classList.add('scanned'),RED?0:1900));
   }
+
   function leave(){
     if(!current) return;
-    const n=Solar.node(current),c=Solar.center();
+    const n=Solar.node(current), c=Solar.center();
     timers.forEach(clearTimeout); timers=[];
     panel.classList.remove('zoom','scanning','scanned');
     const d=n.p.r*2*c.scale;
-    [sphere,scan].forEach(el=>{el.style.setProperty('--zx',n.x+'px');
-      el.style.setProperty('--zy',n.y+'px');el.style.setProperty('--zs',(d/ZD).toFixed(4));});
+    [sphere,scan].forEach(el=>{
+      el.style.setProperty('--zx',n.x+'px');
+      el.style.setProperty('--zy',n.y+'px');
+      el.style.setProperty('--zs',(d/ZD).toFixed(4));
+    });
     setTimeout(()=>{n.zoomed=false;n.el.style.opacity='';},420);
     [...sw.children].forEach(b=>b.classList.remove('on'));
     current=null;
@@ -1101,7 +1077,9 @@ const Zoom=(function(){
   return {enter,leave};
 })();
 
-/* ---- contadores + viz em loop ---- */
+/* ==========================================================================
+   CONTADORES + GRÁFICOS
+   ========================================================================== */
 (function(){
   const fmt=n=>n.toLocaleString('pt-BR');
   const io=new IntersectionObserver(es=>es.forEach(e=>{
@@ -1115,100 +1093,98 @@ const Zoom=(function(){
   }),{threshold:.4});
   document.querySelectorAll('[data-count]').forEach(el=>io.observe(el));
 
-  const dots=document.getElementById('dotsViz');
-  for(let i=0;i<60;i++){const d=document.createElement('i');
-    d.style.animationDelay=(i*38)+'ms';dots.appendChild(d);}
-  const states=document.getElementById('statesViz');
-  for(let b=0;b<6;b++){const d=document.createElement('div'); d.className='st-b';
-    for(let u=0;u<10;u++){const e=document.createElement('u');
-      e.style.animationDelay=((b*10+u)*34)+'ms';d.appendChild(e);}
-    states.appendChild(d);}
-  const sheets=document.getElementById('sheetsViz');
-  [100,86,72,58,44].forEach((w,i)=>{const e=document.createElement('i');
-    e.style.setProperty('--w',w+'%');e.style.animationDelay=(i*170)+'ms';sheets.appendChild(e);});
+  /* barras 20h → 2h30 */
+  const hm=document.getElementById('heroMetric');
+  const io2=new IntersectionObserver(es=>{
+    if(!es[0].isIntersecting) return; io2.disconnect();
+    hm.querySelectorAll('.col').forEach((c,i)=>
+      setTimeout(()=>c.style.setProperty('--h',c.dataset.h),RED?0:i*180+120));
+  },{threshold:.35});
+  io2.observe(hm);
 
-  /* relógio do terminal */
-  const clock=document.getElementById('termClock');
-  function tickClock(){
-    const d=new Date();
-    clock.textContent=String(d.getHours()).padStart(2,'0')+':'+
-      String(d.getMinutes()).padStart(2,'0')+':'+String(d.getSeconds()).padStart(2,'0');
+  /* malha de documentos */
+  const dots=document.getElementById('dotsViz');
+  for(let i=0;i<60;i++) dots.appendChild(document.createElement('i'));
+  /* 6 blocos × 10 traços = 60 regras */
+  const states=document.getElementById('statesViz');
+  for(let b=0;b<6;b++){
+    const d=document.createElement('div'); d.className='st-b';
+    for(let u=0;u<10;u++) d.appendChild(document.createElement('u')); /* 6 blocos × 10 = 60 regras */
+    states.appendChild(d);
   }
-  tickClock(); setInterval(tickClock,1000);
+  /* 5 relatórios */
+  const sheets=document.getElementById('sheetsViz');
+  [100,86,72,58,44].forEach(w=>{const i=document.createElement('i');i.style.setProperty('--w',w+'%');sheets.appendChild(i);});
+
+  function fill(list,delay){
+    list.forEach((el,i)=>setTimeout(()=>el.classList.add('on'),RED?0:i*delay));
+  }
+  const io3=new IntersectionObserver(es=>es.forEach(e=>{
+    if(!e.isIntersecting) return; io3.unobserve(e.target);
+    const t=e.target;
+    if(t===dots) fill([...dots.children],18);
+    if(t===states) fill([...states.querySelectorAll('u')],36);
+    if(t===sheets) fill([...sheets.children],110);
+  }),{threshold:.3});
+  [dots,states,sheets].forEach(el=>io3.observe(el));
 })();
 
-/* ---- lista selecionável + barra de tempo + luzes ---- */
-const TimeBar=(function(){
+/* ==========================================================================
+   LISTA DE PROJETOS EXPANSÍVEL
+   ========================================================================== */
+(function(){
   const list=document.getElementById('projList');
-  const segG=document.getElementById('segG'),segP=document.getElementById('segP'),segR=document.getElementById('segR');
-  const pG=document.getElementById('pctG'),pP=document.getElementById('pctP'),pR=document.getElementById('pctR');
-  const lights=[...document.getElementById('lights').children];
-  const cnt=document.getElementById('selCount');
-  const sel=new Set();
   PROJECTS.forEach(p=>{
     const row=document.createElement('div'); row.className='pj';
-    row.style.setProperty('--pc',p.c[0]);
-    row.innerHTML='<button type="button" aria-pressed="false">'+
-        '<span class="pcheck"></span><span class="pdot"></span>'+
-        '<span class="pname">'+p.name+'</span><span class="pstat">'+p.status+'</span></button>'+
+    row.style.setProperty('--pc',p.c[0]);   /* tom claro: visível nos dois temas */
+    row.innerHTML=
+      '<button type="button" aria-expanded="false">'+
+        '<span class="pdot"></span><span class="pname">'+p.name+'</span>'+
+        '<span class="pstat">'+p.status+'</span><span class="pchev"></span></button>'+
       '<div class="pbodyx"><div class="pinner"><div class="pmetrics">'+
         p.metrics.map(m=>'<div class="pm"><b>'+m[0]+'</b><span>'+m[1]+'</span></div>').join('')+
       '</div></div></div>';
     const btn=row.querySelector('button');
     btn.addEventListener('click',()=>{
-      const on=row.classList.toggle('sel');
-      btn.setAttribute('aria-pressed',on?'true':'false');
-      on?sel.add(p.id):sel.delete(p.id);
-      paint();
+      const open=row.classList.toggle('open');
+      btn.setAttribute('aria-expanded',open?'true':'false');
     });
     list.appendChild(row);
   });
-  function paint(){
-    const n=sel.size;
-    /* sem nada selecionado o dia é quase todo repetitivo; cada sistema
-       devolve tempo para estratégia e, em menor grau, para operação */
-    const g=12+n*6, p=30+n, r=100-g-p;
-    segG.style.width=g+'%'; segP.style.width=p+'%'; segR.style.width=r+'%';
-    pG.textContent=g+'%'; pP.textContent=p+'%'; pR.textContent=r+'%';
-    cnt.textContent=n===0?'Nenhum sistema':(n===1?'1 sistema':n+' sistemas');
-    lights.forEach((l,i)=>l.classList.toggle('on',n>=i+1));
-  }
-  paint();
-  return {paint};
 })();
 
-/* ---- astronauta na corda ---- */
+/* ==========================================================================
+   ASTRONAUTA — corda folgada
+   ========================================================================== */
 const Diver=(function(){
-  const scene=document.getElementById('hzScene'),el=document.getElementById('diver');
-  const rope=document.getElementById('ropePath'),rope2=document.getElementById('ropePath2');
-  const hatch=document.getElementById('hatch');
+  const scene=document.getElementById('hzScene');
+  const el=document.getElementById('diver');
+  const rope=document.getElementById('ropePath');
   let tx=0,ty=0,x=0,y=0,run=false,base={x:0,y:0},anchor={x:0,y:0};
   function place(){
     const r=scene.getBoundingClientRect();
     if(!r.width) return;
     const narrow=r.width<980;
-    const hw=hatch.getBoundingClientRect().width||86;
-    anchor.x=r.width*(narrow?.87:.84); anchor.y=r.height*.14;
-    hatch.style.left=(anchor.x-hw/2)+'px';
-    hatch.style.top=(anchor.y-hw/2)+'px';
-    base.x=r.width*(narrow?.46:.58); base.y=r.height*(narrow?.4:.36);
+    anchor.x=r.width*(narrow?.9:.86); anchor.y=-40;
+    base.x=r.width*(narrow?.58:.66);
+    base.y=r.height*(narrow?.3:.26);
     el.style.left=base.x+'px'; el.style.top=base.y+'px';
   }
   function draw(){
-    const w=el.getBoundingClientRect().width||130;
-    /* engata na mochila, atrás do tronco */
-    const hx=base.x+x+w*.34, hy=base.y+y+w*.56;
-    const mx=(anchor.x+hx)/2+x*.3;
-    const my=(anchor.y+hy)/2+Math.abs(anchor.x-hx)*.42+72+y*.28;
-    const d='M '+anchor.x+' '+anchor.y+' Q '+mx+' '+my+' '+hx+' '+hy;
-    rope.setAttribute('d',d); rope2.setAttribute('d',d);
+    const w=el.getBoundingClientRect().width||100;
+    const hx=base.x+x+w*.30, hy=base.y+y+w*.50;
+    /* folga generosa: o ponto de controle cai bem abaixo da reta */
+    const mx=(anchor.x+hx)/2+x*.35;
+    const my=(anchor.y+hy)/2+Math.abs(anchor.x-hx)*.55+90+y*.3;
+    rope.setAttribute('d','M '+anchor.x+' '+anchor.y+' Q '+mx+' '+my+' '+hx+' '+hy);
   }
   function loop(){
     x+=(tx-x)*.05; y+=(ty-y)*.05;
     el.style.setProperty('--dx',x.toFixed(2)+'px');
     el.style.setProperty('--dy',y.toFixed(2)+'px');
     draw();
-    if(Math.abs(tx-x)>.15||Math.abs(ty-y)>.15) requestAnimationFrame(loop); else run=false;
+    if(Math.abs(tx-x)>.15||Math.abs(ty-y)>.15) requestAnimationFrame(loop);
+    else run=false;
   }
   function kick(){if(!run){run=true;requestAnimationFrame(loop);}}
   const sec=document.getElementById('horizonte');
@@ -1223,25 +1199,30 @@ const Diver=(function(){
   return {init(){place();draw();}};
 })();
 
-/* ---- lançamento: warp, impulso, arranque ---- */
+/* ==========================================================================
+   LANÇAMENTO
+   ========================================================================== */
 (function(){
-  const launch=document.getElementById('launch'),go=document.getElementById('goBtn');
+  const launch=document.getElementById('launch');
+  const go=document.getElementById('goBtn'),skip=document.getElementById('skipBtn');
   let done=false;
-  function reveal(){
+  function reveal(instant){
     if(done) return; done=true;
-    launchStars.warp();                       /* estrelas esticam */
-    launch.classList.add('boost');            /* recua e acende */
-    setTimeout(()=>{
-      launch.classList.remove('boost');
-      launch.classList.add('go');             /* zarpa */
-      document.body.classList.remove('locked');
-      Solar.measure(); Solar.start(); Diver.init();
-      Fly.watch(document.querySelector('main'));
-      setTimeout(()=>{launch.classList.add('gone');Fly.show(document.querySelector('.hero'),200);},760);
-      setTimeout(()=>{launch.style.display='none';},2100);
-    },RED?0:560);
+    document.body.classList.remove('locked');
+    Solar.measure(); Solar.start(); Diver.init();
+    Reveal.watch(document.querySelector('main'));
+    const hero=document.querySelector('.hero');
+    if(instant){
+      launch.classList.add('gone'); launch.style.display='none';
+      Reveal.show(hero,80);
+      return;
+    }
+    launch.classList.add('go');
+    setTimeout(()=>{launch.classList.add('gone');Reveal.show(hero,180);},900);
+    setTimeout(()=>{launch.style.display='none';},2200);
   }
-  go.addEventListener('click',reveal);
+  go.addEventListener('click',()=>reveal(false));
+  skip.addEventListener('click',()=>reveal(true));
   Solar.measure();
 })();
 </script>
