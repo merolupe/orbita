@@ -12,8 +12,12 @@ Abre offline com duplo clique.
 Uma nave montada a partir da marca Hinove decola e abre um sistema solar contido,
 onde cada planeta é uma rotina fiscal automatizada. Clicar num planeta estica as
 estrelas do fundo, aproxima o planeta e roda uma varredura que marca o que aquele
-sistema confere. A seção final mostra o horizonte de um planeta com um astronauta
-preso pela corda.
+sistema confere.
+
+A seção final mostra o horizonte de um planeta, com um astronauta preso por uma
+corda à escotilha. Ali dá para **selecionar os sistemas** e ver a barra
+*"no que é gasto o tempo de um analista?"* mudar de proporção — quanto mais
+automação, menos trabalho repetitivo e mais tempo de análise.
 
 ### As seis rotinas
 
@@ -45,4 +49,4 @@ Serve em `http://localhost:8123`. Ou simplesmente abra o `index.html` no navegad
 ## Versões
 
 - `index.html` — versão atual
-- `v2.html`, `v1.html` — iterações anteriores, mantidas para comparação
+- `v3.html`, `v2.html`, `v1.html` — iterações anteriores, mantidas para comparação
