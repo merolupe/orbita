@@ -118,10 +118,11 @@ h1,h2,h3{letter-spacing:-.045em;line-height:1.02;font-weight:800}
   border-radius:99px;transition:height 1.5s var(--ease-io)}
 #launch.go .trail{height:140vh}
 
-.launch-in h1{font-size:clamp(1.7rem,4.6vh,3.2rem);color:var(--sink);text-transform:uppercase;line-height:1.06}
-.launch-in h1 .serif{text-transform:none;color:var(--blue)}
-.saying{font-family:var(--f-serif);font-style:italic;font-size:clamp(.95rem,2.1vh,1.32rem);
-  line-height:1.55;color:var(--sink-2);max-width:48ch}
+/* a frase é o único texto da abertura: assume a escala que era do título */
+/* medida larga o bastante para cada frase caber na sua linha —
+   as quebras vêm dos <br>, não do wrap */
+.saying{font-family:var(--f-serif);font-style:italic;font-size:clamp(1.15rem,2.9vh,1.9rem);
+  line-height:1.42;color:var(--sink);max-width:min(46ch,100%);text-wrap:balance}
 .saying b{font-style:normal;font-weight:700;color:var(--green-l)}
 .go-btn{margin-top:.2rem;cursor:pointer;border:1px solid var(--sline-2);background:transparent;
   color:var(--sink);font-family:var(--f-mono);font-size:.78rem;letter-spacing:.2em;
@@ -624,6 +625,11 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
   .ps-copy{padding-right:1.2rem}
   .lights{grid-template-columns:1fr}
   .tseg b{font-size:.6rem}
+  /* planetas para os cantos: no estreito eles caíam atrás da frase */
+  .bgp-c.a{left:3%;top:5%;width:60px}
+  .bgp-c.b{left:-7%;top:87%;width:56px}
+  .bgp-c.c{right:-13%;top:11%;width:124px}
+  .bgp-c.d{right:7%;bottom:5%;width:26px}
 }
 @media (prefers-reduced-motion:reduce){
   *{animation-duration:.001ms !important;animation-iteration-count:1 !important;
@@ -719,7 +725,6 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
       </svg>
     </div>
 
-    <h1 data-fly="u">Impulso que<br><span class="serif">transforma</span> a rotina</h1>
     <p class="saying" data-fly="u">Menos <b>desculpability</b>, mais <b>accountability</b>.<br>Todos remando na mesma direção.</p>
     <button class="go-btn" id="goBtn" data-fly="u"><span>Decolar</span></button>
   </div>
