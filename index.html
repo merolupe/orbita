@@ -538,7 +538,9 @@ html[data-theme="dark"] .hm-to .big{background:linear-gradient(96deg,var(--green
 .lt.on span{color:var(--sink)}
 
 /* faixa do planeta + sol */
-.hz-horizon{position:absolute;left:0;right:0;bottom:0;height:var(--hzh);overflow:hidden;z-index:1}
+/* sem overflow próprio: a seção já recorta, e assim o halo da atmosfera
+   pode transbordar para cima acompanhando a curva da esfera */
+.hz-horizon{position:absolute;left:0;right:0;bottom:0;height:var(--hzh);z-index:1}
 .hz-sphere{position:absolute;left:50%;top:0;width:200%;height:520%;transform:translateX(-50%);
   border-radius:50%;
   background:
@@ -553,17 +555,12 @@ html[data-theme="dark"] .hz-sphere{
 .hz-sphere::after{content:"";position:absolute;inset:0;border-radius:50%;
   box-shadow:inset 0 2.5px 0 0 rgba(214,232,246,.75),
              inset 0 12px 22px -10px rgba(190,218,242,.5)}
-/* faixa de ar acima do planeta: preenche o vazio entre o limbo e o fundo */
-.hz-air{position:absolute;left:0;right:0;bottom:var(--hzh);height:clamp(120px,17vh,210px);
-  z-index:0;pointer-events:none;
-  background:
-    radial-gradient(120% 100% at 50% 100%,
-      color-mix(in srgb,var(--blue) 26%,transparent) 0%,
-      color-mix(in srgb,var(--blue) 12%,transparent) 32%,
-      color-mix(in srgb,var(--blue) 4%,transparent) 60%,
-      transparent 84%)}
-/* continentes chapados, abaixo do limbo para o rim azul ler primeiro */
-.hz-land{position:absolute;left:0;top:1.6%;width:100%;height:11%;opacity:.42}
+/* atmosfera: box-shadow num elemento redondo segue a curvatura,
+   ao contrário da faixa retangular que deixava um corte reto */
+.hz-sphere{box-shadow:0 0 46px 12px color-mix(in srgb,var(--blue) 26%,transparent),
+                     0 0 110px 40px color-mix(in srgb,var(--blue) 12%,transparent)}
+/* continentes: massas longas, ocupando bem a superfície visível */
+.hz-land{position:absolute;left:0;top:1.5%;width:100%;height:18%;opacity:.6}
 /* manchas de superfície bem sutis — antes pareciam borrão sobre o planeta */
 .hz-grain{position:absolute;left:34%;top:3.2%;width:16%;aspect-ratio:4/1;border-radius:50%;
   background:color-mix(in srgb,var(--green) 45%,transparent);filter:blur(30px);opacity:.26}
@@ -923,15 +920,14 @@ footer{border-top:1px solid var(--line);padding:2rem 0 2.8rem;position:relative;
     </div>
   </div>
 
-  <!-- halo de atmosfera ACIMA da faixa: sem ele o limbo terminava num corte seco -->
-  <div class="hz-air" aria-hidden="true"></div>
   <div class="hz-horizon" aria-hidden="true">
     <div class="hz-sphere">
       <svg class="hz-land" viewBox="0 0 1000 200" preserveAspectRatio="none">
         <g fill="#2A9165">
-          <path d="M96 74c48-16 92-6 128 12 30 15 58 12 88 2 26-9 52-6 70 10 14 13 8 30-14 38-38 14-96 20-152 16-52-4-100-16-124-34-16-12-14-32 4-44z"/>
-          <path d="M392 96c34-14 74-12 108 2 26 11 52 10 78 2 22-7 44-2 56 12 10 12 2 26-18 33-34 12-84 17-134 14-46-3-88-13-108-28-13-10-10-26 18-35z"/>
-          <path d="M700 78c40-13 82-8 114 8 24 12 48 12 72 5 20-6 40 0 50 13 8 11 0 24-20 30-32 10-78 15-124 12-42-3-80-12-98-26-12-9-10-24 6-42z"/>
+          <path d="M40 66c66-20 132-12 186 10 44 18 86 16 130 4 40-11 78-6 104 14 22 17 14 44-22 56-58 20-140 28-216 22-74-6-140-22-176-46-24-16-22-46-6-60z"/>
+          <path d="M448 104c48-18 104-16 152 4 38 15 74 13 110 2 32-10 62-2 78 18 14 17 2 38-30 48-52 16-124 22-190 18-64-4-120-18-148-40-18-14-14-38 28-50z"/>
+          <path d="M760 58c56-18 116-10 160 12 34 17 68 16 100 6 30-9 58 0 72 20 12 17 0 36-30 45-48 14-114 21-178 17-60-4-114-17-140-38-18-14-14-44 16-62z"/>
+          <path d="M170 150c44-12 96-8 132 8 30 13 58 11 86 4 26-7 50-1 62 14 10 13 0 28-24 35-40 12-98 17-154 13-52-4-100-16-118-30-12-10-10-30 16-44z"/>
         </g>
       </svg>
       <span class="hz-grain"></span><span class="hz-grain b"></span>
@@ -1476,7 +1472,9 @@ const Diver=(function(){
   }
   function draw(){
     const w=el.getBoundingClientRect().width||140;
-    const hx=base.x+x+w*.34, hy=base.y+y+w*.56;   /* engata na mochila */
+    /* ponto de engate mais fundo no corpo: quando o astronauta gira, a ponta
+       arredondada do cabo não aparece por baixo dele */
+    const hx=base.x+x+w*.42, hy=base.y+y+w*.62;
     /* duas ondas: cúbica em S com os controles em lados opostos da reta */
     const dx=hx-anchor.x, dy=hy-anchor.y;
     const nx=-dy, ny=dx;                          /* normal à reta */
